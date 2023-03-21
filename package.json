@@ -1,0 +1,26 @@
+{
+  "name": "ontune-web-viewer-svelte",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^1.1.0",
+    "svelte": "^3.52.0",
+    "vite": "^3.2.3"
+  },
+  "dependencies": {
+    "@mojs/core": "^1.3.0",
+    "d3": "^7.8.0",
+    "d3-scale": "^4.0.2",
+    "gridjs": "^5.1.0",
+    "gridjs-svelte": "^2.1.1",
+    "svelte-tabs": "^1.1.0",
+    "svelte-tree-view-component": "^1.0.3",
+    "svrollbar": "^0.12.0"
+  }
+}

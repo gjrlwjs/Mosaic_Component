@@ -1,0 +1,183 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+
+  width: 100%;
+  height: 100%;
+  /* box-sizing: border-box; */
+
+  overflow: hidden;
+}
+
+/* div {
+  display: block;
+} */
+select {
+  height: 25px;
+  line-height: 25px;
+}
+
+button {
+  margin-top: 5px;
+  margin-right: 6px;
+
+  width: 60px;
+  height: 30px;
+
+  user-select: none;
+  cursor: default;
+}
+
+#div_mosaic {
+  margin-left: 0px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* float: right; */
+  /* display: flex; */
+}
+
+#div_mosaic_menubar {
+  /* flex: 1; */
+  border: 0;
+  border-color: Red;
+  background-color: whitesmoke;
+  width: 100%;
+  height: 40px;
+  position: static;
+  z-index: 1;
+  text-align: right;
+  /* user-select: none; */
+}
+
+#div_mosaic_main {
+  width: 100%;
+  height: calc(100% - 40px);
+  /* position: fixed; */
+  position: static;
+}
+
+#div_mosaic_body {
+  width: 100%;
+  height: inherit;
+  position: absolute;
+  background-color: rgb(86, 162, 175);
+}
+
+.draggable.dragging {
+  opacity: 0.5;
+}
+
+.div_Shadow {
+  /* flex: 1; */
+  margin: 3px;
+  border: 0;
+
+  background-color: skyblue;
+  inset: "0% 0% 50% 0%";
+  position: absolute;
+  z-index: 100;
+  display: none;
+  opacity: 50%;
+  /* cursor: pointer;   */
+}
+
+.div_Main_Background {
+  /* flex: 1; */
+  margin: 0;
+  border: 0;
+  /* border-color: Red; */
+  background-color: black;
+  inset: "0% 0% 0% 0%";
+  /* height: 100%; */
+  position: absolute;
+  /* z-index: 1; */
+}
+
+.div_Background {
+  /* flex: 1; */
+  margin: 3px;
+  border: 0;
+  border-color: Red;
+  background-color: white;
+  inset: "0% 0% 0% 0%";
+  /* height: 100%; */
+  position: absolute;
+  z-index: 1;
+}
+
+.div_Float_Background {
+  margin: 0;
+  border: 3px solid black;
+  /* background-color: blue; */
+  position: absolute;
+
+  top: 30%;
+  left: 15%;
+
+  width: 700px;
+  height: 400px;
+  /* inset: "30% 15% 30% 15%"; */
+
+  /* top:  30%;
+  left: 15%;
+  width: 50%;
+  height: 50%; */
+
+  z-index: 20;
+  resize: both;
+  overflow: auto;
+}
+
+.div_Title {
+  /* flex: 0.3; */
+  height: 40px;
+  border: 0;
+  text-align: right;
+  background-color: gainsboro;
+  border-bottom: 3px;
+  border-bottom-color: #373737;
+
+  cursor: move;
+}
+
+.div_Body {
+  /* flex: 0.7; */
+  height: calc(100% - 40px);
+  border: 0;
+  width: 100%;
+  text-align: center;
+  vertical-align: middle;
+  background-color: whitesmoke;
+  user-select: none;
+  position: relative;
+  /* overflow: hidden; */
+}
+
+.div_Col {
+  margin-left: -3px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  width: 6px;
+  cursor: ew-resize;
+
+  position: absolute;
+  z-index: 10;
+  /* touch-action: none; */
+  background-color: rgb(76, 79, 85);
+}
+
+.div_Row {
+  margin-top: -3px;
+  margin-left: 3px;
+  margin-right: 3px;
+  height: 6px;
+  cursor: ns-resize;
+
+  position: absolute;
+  z-index: 10;
+  /* touch-action: none; */
+  background-color: rgb(76, 79, 85);
+}
