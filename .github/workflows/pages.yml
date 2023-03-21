@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages _1
+name: Deploy Mosaic Component
 
 on:
   # Runs on pushes targeting the default branch
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 16
       - name: Install Modules
         run: npm ci
       - name: Build Pages
