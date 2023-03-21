@@ -7,9 +7,6 @@
 	import { Binary_Tree, Node } from "./Binary_tree";
 	import { PercentToLength, PercentToPx, Position_Check, Position_Fix } from "./ufunction";
 
-  import Grid from './Com_Grid.svelte';
-  import Bar_Chart from './Com_BarChart.svelte';
-  import Line_Chart from './Com_LineChart.svelte';
   import { onMount } from 'svelte';
   // import nice from 'd3-scale/src/nice.js';
 
