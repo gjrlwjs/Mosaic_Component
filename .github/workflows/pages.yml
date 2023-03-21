@@ -26,11 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: "16.x"
       - name: Install Modules
         run: npm ci
       - name: Build Pages
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
@@ -58,7 +58,7 @@ jobs:
           path: ./dist/
       - name: Deploy to GitHub Pages
         id: deploy_pages
-        uses: peaceiris/actions-gh-pages@v2
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: ./dist/
