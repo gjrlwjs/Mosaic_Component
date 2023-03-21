@@ -1,5 +1,5 @@
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy Mosaic Component
+name: Deploy static content to Pages _1
 
 on:
   # Runs on pushes targeting the default branch
@@ -26,11 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16.x"
+          node-version: 16
       - name: Install Modules
         run: npm ci
       - name: Build Pages
@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Download artifact
         uses: actions/download-artifact@v2
         with:
@@ -58,7 +58,8 @@ jobs:
           path: ./dist/
       - name: Deploy to GitHub Pages
         id: deploy_pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: JamesIves/github-pages-deploy-action@4
         with:
-          personal_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          publish_dir: ./dist/
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: dist
