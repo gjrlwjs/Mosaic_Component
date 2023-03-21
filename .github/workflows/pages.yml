@@ -46,7 +46,7 @@ jobs:
     needs: build
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy_pages.outputs.deploy_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,10 +56,9 @@ jobs:
         with:
           name: built-site
           path: ./dist/
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+        id: deploy_pages
+        uses: actions/gh-pages@v3
         with:
-          target-folder: "./dist"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist/
