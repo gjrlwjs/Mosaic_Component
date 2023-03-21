@@ -10,7 +10,6 @@
   import Grid from './Com_Grid.svelte';
   import Bar_Chart from './Com_BarChart.svelte';
   import Line_Chart from './Com_LineChart.svelte';
-  import Pie_Chart from './Com_Pie.svelte';
   import { onMount } from 'svelte';
   // import nice from 'd3-scale/src/nice.js';
 
