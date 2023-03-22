@@ -217,7 +217,12 @@ const Add_Div = (e) => {
 
   const Del_Div_Float = (e) => {
     // 기존 배열에서 해당 노드를 삭제한다.
-    $Float_Arr.splice((e.id - 1), 1);
+    $Float_Arr.splice(e.id, 1);
+
+    $Float_Arr.forEach((tmp_float_node, index) => {
+      // 삭제에 의해 ID가 재정립 되어야한다.
+      tmp_float_node.id = index;
+    });    
 
     // 배열 갱신
     $Float_Arr = $Float_Arr;
@@ -755,21 +760,23 @@ const onMouseDown_bar_event = (e) => {
     // tmp_Item.inset_right = tmp_float_div.offsetWidth;
     // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
 
-    console.log(tmp_Item);
+    console.log(e.target);
+    console.log($Float_Arr);
 
     if (tmp_Item) {
       tmp_float_div.addEventListener('mouseup', onResize_End_Float_Event);
     };
 
-    function onResize_End_Float_Event() {
+    function onResize_End_Float_Event(e) {
       // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
       console.log("=============Resize_End_Float==========="); 
 
-      tmp_Item.inset_right = tmp_float_div.offsetWidth;
-      tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+      tmp_Item.inset_right = tmp_float_div.clientWidth;
+      tmp_Item.inset_bottom = tmp_float_div.clientHeight;
 
-      console.log(tmp_Item);
-      
+      console.log(e.target);
+      console.log($Float_Arr);
+
       tmp_float_div.removeEventListener('mouseup', onResize_End_Float_Event);    
     };
   };
