@@ -129,6 +129,7 @@ button {
   z-index: 20;
   resize: both;
   overflow: auto;
+  user-select: none;
 }
 
 .div_Title {

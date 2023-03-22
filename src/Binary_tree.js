@@ -167,6 +167,7 @@ export class Binary_Tree {
   // 그렇다면 Left는 언제 생기냐? 추가 버튼이 눌려서 이벤트가 생성될 때, 해당 Div에 있는 key를 알 수 있으니, 그걸로 Left로 지정한다.
   // Right가 생길 때, Left가 null 일 수는 없다. 이때는 노드 자체를 삭제하고 상위 부모 자리에 Right 노드 정보를 넣어주어야한다.
   // 기존 Tree에서 Left에 새로 추가되는 내용을 반환해야한다.
+  // Root를 제외한 기본형임.
   insert_Float(new_id, c_type) {
     console.log("===========insert Float Node 1회============");
 

@@ -8,6 +8,7 @@
 	import { PercentToLength, PercentToPx, Position_Check, Position_Fix } from "./ufunction";
 
   import { onMount } from 'svelte';
+  import { loop_guard } from 'svelte/internal';
   // import nice from 'd3-scale/src/nice.js';
 
 	const bst = new Binary_Tree();
@@ -150,6 +151,19 @@ const Add_Div = (e) => {
       $Mosaic_Arr = [bst.root];
     } else {
       // 아닌 경우는 무조건 Float
+      // Float Div 추가하기
+      const insert_result = bst.insert_Float($Float_Arr.length, select_chart);
+
+      if (insert_result) {
+        // idx = idx + 2;
+
+        $Float_Arr.push(insert_result);
+        // $Mosaic_Arr.push(insert_result[1]);
+        $Float_Arr = $Float_Arr;
+
+        // Data_Infos_Refresh();
+      };
+
       {
         // grand_node와 형제 노드 정보를 넣어줘야한다.
         // 0을 1|2로 Div 추가하기
@@ -169,23 +183,6 @@ const Add_Div = (e) => {
 
         //   // Data_Infos_Refresh();
         // };
-      };
-
-      // Float Div 추가하기
-      const insert_result = bst.insert_Float($Float_Arr.length, select_chart);
-
-      if (insert_result) {
-        // idx = idx + 2;
-
-        // setArr([...arr, insert_result[0], insert_result[1]]);
-        // arr = [...arr, insert_result[0], insert_result[1]];
-        // arr = [...arr, insert_result[0], insert_result[1]];
-
-        $Float_Arr.push(insert_result);
-        // $Mosaic_Arr.push(insert_result[1]);
-        $Float_Arr = $Float_Arr;
-
-        // Data_Infos_Refresh();
       };
     };
     console.log($Float_Arr);
@@ -224,20 +221,6 @@ const Add_Div = (e) => {
 
     // 배열 갱신
     $Float_Arr = $Float_Arr;
-  };  
-
-  // const Resize_Div_Done = (e) => {
-  function Resize_Div_Done() {
-    console.log('123');
-    // console.log(tmp_Item);    
-    // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
-		// const tmp_float_div = e.target;
-    // let tmp_Item = $Float_Arr[parseInt(e.target.getAttribute('name'))];
-
-    // tmp_Item.inset_right = tmp_float_div.offsetWidth;
-    // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
-
-
   };  
 
   // const Changes = () => {
@@ -762,6 +745,36 @@ const onMouseDown_bar_event = (e) => {
 		};
 	};  
 
+  const onResize_Start_Float_Event = (e) => {
+    // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
+    console.log("=============Resize_Start_Float==========="); 
+
+		const tmp_float_div = e.target;
+    let tmp_Item = $Float_Arr[parseInt(e.target.getAttribute('name'))];
+
+    // tmp_Item.inset_right = tmp_float_div.offsetWidth;
+    // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+
+    console.log(tmp_Item);
+
+    if (tmp_Item) {
+      tmp_float_div.addEventListener('mouseup', onResize_End_Float_Event);
+    };
+
+    function onResize_End_Float_Event() {
+      // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
+      console.log("=============Resize_End_Float==========="); 
+
+      tmp_Item.inset_right = tmp_float_div.offsetWidth;
+      tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+
+      console.log(tmp_Item);
+      
+      tmp_float_div.removeEventListener('mouseup', onResize_End_Float_Event);    
+    };
+  };
+
+
 	// if (bst.root == null) {
 	// 	// console.log("===========Root 생성===========");
   //   // bst.root = new Node(idx, "N", "C", "windows " + (node_text_idx + 1), 0, 0, 0, 0, 100);
@@ -919,7 +932,7 @@ const onMouseDown_bar_event = (e) => {
     <!-- {console.log(index)} -->
     <!-- {arr[5].arr_Data} -->
       <div
-      class="div_Float_Background" name={item.id} on:resize={()=>{console.log('aaa')}} 
+      class="div_Float_Background" name={item.id} on:mousedown={onResize_Start_Float_Event} 
       style={"top: " + `${item.inset_top}px;` + " left: " + `${item.inset_left}px;` +  " width: " + `${item.inset_right}px;` + " height: " + `${item.inset_bottom}px;`}
       >
         <div class="div_Title" draggable="true" on:mousedown={onMouseDown_Float_Event}>
@@ -937,10 +950,11 @@ const onMouseDown_bar_event = (e) => {
             <Pie_Chart  data={item.left.arr_Data} />
           {/if} -->
         </div>
-      </div>    
-    {/each} 
+      </div>
+    {/each}
   </div>
 </div>
+
 
 
 <!-- export default Mosaic; -->
