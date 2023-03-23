@@ -7,6 +7,7 @@ export class Node {
     div_type = "N", // DIV 표시 방식(None / Col / Row)
     node_type = "C", // 노드 타입(Disable / Parent / Child )
     window_type = "Float", // Form Type(Dock / Float)
+    float_type = false, // Float Type(false / true)
     chart_type = 0, // Chart Type 0 ~ 9
 
     inset_top = 0,
@@ -23,6 +24,7 @@ export class Node {
     this.div_type = div_type;
     this.node_type = node_type;
     this.window_type = window_type;
+    this.float_type = float_type;
     this.chart_type = chart_type;
 
     this.inset_top = inset_top;
@@ -81,6 +83,7 @@ export class Binary_Tree {
       "N",
       "C",
       old_node.window_type,
+      old_node.float_type,
       old_node.chart_type,
       old_node.inset_top,
       old_node.inset_right,
@@ -96,6 +99,7 @@ export class Binary_Tree {
       "N",
       "C",
       "Dock",
+      old_node.float_type,
       c_type,
       old_node.inset_top,
       old_node.inset_right,
@@ -138,6 +142,7 @@ export class Binary_Tree {
       // 기존 old도 값을 바꿔주고
       old_node.node_type = "P";
       old_node.window_type = "";
+      old_node.float_type = false;
       old_node.chart_type = -1;
 
       // 형제 노드의 상태에 따라, 부모가 된 현재 노드의 비율이 달라짐.
@@ -172,11 +177,11 @@ export class Binary_Tree {
     console.log("===========insert Float Node 1회============");
 
     // 독립적인 노드를 생성해서 반환한다.
-    const new_node = new Node(new_id, "N", "C", "Float", c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
+    const new_node = new Node(new_id, "N", "C", "Float", false, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
 
     // console.log(window.innerWidth);
     // console.log(window.innerHeight);
-    console.log(new_node);
+    // console.log(new_node);
 
     return new_node;
   }
@@ -187,8 +192,8 @@ export class Binary_Tree {
     // 부모 node 정보를 불러와서 left, right 로 분류하여 추가해준다.(기존 Left, 신규 Right)
     // const old_node = this.find_node(parent_id);
     const old_node = parent_node;
-    const left_node = new Node(new_id, "N", "C", "Dock", old_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
-    const right_node = new Node(new_id + 1, "N", "C", "Dock", change_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
+    const left_node = new Node(new_id, "N", "C", "Dock", false, old_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
+    const right_node = new Node(new_id + 1, "N", "C", "Dock", false, change_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
 
     if (bLeft === true) {
       left_node.chart_type = change_node.chart_type;
@@ -205,6 +210,7 @@ export class Binary_Tree {
       }
       old_node.node_type = "P";
       old_node.window_type = "";
+      old_node.float_type = false;
       old_node.chart_type = -1;
 
       // Left | right 입력
@@ -291,12 +297,14 @@ export class Binary_Tree {
     // del_node.p_id = -1;
     del_node.node_type = "D";
     del_node.window_type = "";
+    del_node.float_type = false;
     del_node.chart_type = -1;
 
     // parent_node.p_id  = -1;
     // parent_node.div_type = "N";
     parent_node.node_type = "D";
     parent_node.window_type = "";
+    parent_node.float_type = false;
     parent_node.chart_type = -1;
 
     parent_node.left = null;

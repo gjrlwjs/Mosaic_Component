@@ -21,6 +21,7 @@
 	let drag_state = "N";                 // N / T / R / B / L
 	let drag_bleft = false;               // T = Left / F = Right
 	let drop_id    = -1;
+  let drag_type  = "Dock";              // 현재 드레그를 하는 타입("", "Dock", "Float")
 
   let select_theme = 0;
   let select_language = 0;
@@ -52,7 +53,6 @@
   function find_target(el) {
     let currentElement = el;
     // console.log("========find_target========");
-
     while (isNaN(parseInt(currentElement.getAttribute('name')))) {
       currentElement = currentElement.parentElement;
       if (currentElement.tagName == "BODY") {
@@ -60,7 +60,8 @@
       }
       // console.log(currentElement.name);
       // console.log(currentElement.getAttribute('name'));    
-    }
+    };
+
     return currentElement;
   };
 
@@ -146,9 +147,10 @@ const Add_Div = (e) => {
 
     if (tmp_id == -1) {
       // root 인 경우는 Dock 
-      bst.root = new Node(idx, "N", "C", "Dock", select_chart, 0, 0, 0, 0, 100);
+      bst.root = new Node(idx, "N", "C", "Dock", false, select_chart, 0, 0, 0, 0, 100);
       
       $Mosaic_Arr = [bst.root];
+      console.log($Mosaic_Arr);
     } else {
       // 아닌 경우는 무조건 Float
       // Float Div 추가하기
@@ -222,7 +224,7 @@ const Add_Div = (e) => {
     $Float_Arr.forEach((tmp_float_node, index) => {
       // 삭제에 의해 ID가 재정립 되어야한다.
       tmp_float_node.id = index;
-    });    
+    });
 
     // 배열 갱신
     $Float_Arr = $Float_Arr;
@@ -263,6 +265,7 @@ const Add_Div = (e) => {
 // ==================================================================================================================================================
 const onMouseDown_bar_event = (e) => {
     drag_node = null;
+    drag_type = "";
 
     // console.log("==============Bar Down=============");
 
@@ -377,6 +380,7 @@ const onMouseDown_bar_event = (e) => {
     drag_state = "N";
     drag_bleft = false;
     drop_id    = parseInt(e.target.parentElement.getAttribute("name"));
+    drag_type  = "Dock";
 
     // 드래그가 시작된 노드를 기준으로 
     let tmp_p_node  = null;
@@ -419,6 +423,7 @@ const onMouseDown_bar_event = (e) => {
   }
 
   const onDragenter_div_event = (e) => {
+    console.log("==========BackGround Drag Enter==========");
     let tmp_target = null;
 
     if (drag_node === null) {
@@ -428,75 +433,102 @@ const onMouseDown_bar_event = (e) => {
     // console.log("==============Div enter=============");  
     // e.preventDefault();
 
-    // drop_id가 -1이 아니고 나 자신이 아닐때 drag_node의 zindex를 뒤로 보낸다!
-    if ((drop_id !== -1) || (drop_id !== drag_node.id)) {
-      let tmp_el = document.getElementsByName(drag_node.id);
-      tmp_el[0].style.zIndex = "0";
-    }
+    // Dock Type과 Float Type이 다르게 동작해야한다.
+    if (drag_type == "Dock") {
+      // drop_id가 -1이 아니고 나 자신이 아닐때 drag_node의 zindex를 뒤로 보낸다!
+      if ((drop_id !== -1) || (drop_id !== drag_node.id)) {
+        let tmp_el = document.getElementsByName(drag_node.id);
+        tmp_el[0].style.zIndex = "0";
+      }
 
-    // drag_node이면 제외하고 재계산 해줘야한다.
-    $Mosaic_Arr.forEach(tmp_node => {
-      // if (tmp_node.p_id !== tmp_p_node.id) {
-      // if (tmp_node.p_id !== arr[drag_node.p_id].id) 
-      {
-        // 인자가 부모 노드이면(= 노드타입이 P인 경우, 하위 노드의 inset 값을 재조정함. 하위 노드가 P인 경우도 마찬가지)
-        if (tmp_node.node_type === "P") {
-          let tmp_left  = tmp_node.left;
-          let tmp_right = tmp_node.right;
-  
-          // inset OverWrite
-          bst.copy_inset(tmp_node, tmp_left);
-          bst.copy_inset(tmp_node, tmp_right);
-  
-          // 부모의 분할 타입에 따라, 부모 대비 자식의 비율을 inset 값에 재조정해준다.
-          if (tmp_node.div_type === "C") {
-            // C = Col = 가로 = left / right
-            let tmp_width = (100 - (tmp_node.inset_left + tmp_node.inset_right));
-  
-            tmp_left.inset_right = tmp_left.inset_right + (tmp_width * ((100 - tmp_left.ratio)  / 100));
-            tmp_right.inset_left = tmp_right.inset_left + (tmp_width * ((100 - tmp_right.ratio) / 100)); //tmp_right.ratio / 100));
-          } else {
-            // R = Row = 세로 = top / bottom
-            let tmp_height = (100 - (tmp_node.inset_top + tmp_node.inset_bottom));
-  
-            tmp_left.inset_bottom = tmp_left.inset_bottom + (tmp_height * ((100 - tmp_left.ratio)  / 100));
-            tmp_right.inset_top   = tmp_right.inset_top   + (tmp_height * ((100 - tmp_right.ratio) / 100)); //tmp_right.ratio / 100));
+      // drag_node이면 제외하고 재계산 해줘야한다.
+      $Mosaic_Arr.forEach(tmp_node => {
+        // if (tmp_node.p_id !== tmp_p_node.id) {
+        // if (tmp_node.p_id !== arr[drag_node.p_id].id) 
+        {
+          // 인자가 부모 노드이면(= 노드타입이 P인 경우, 하위 노드의 inset 값을 재조정함. 하위 노드가 P인 경우도 마찬가지)
+          if (tmp_node.node_type === "P") {
+            let tmp_left  = tmp_node.left;
+            let tmp_right = tmp_node.right;
+    
+            // inset OverWrite
+            bst.copy_inset(tmp_node, tmp_left);
+            bst.copy_inset(tmp_node, tmp_right);
+    
+            // 부모의 분할 타입에 따라, 부모 대비 자식의 비율을 inset 값에 재조정해준다.
+            if (tmp_node.div_type === "C") {
+              // C = Col = 가로 = left / right
+              let tmp_width = (100 - (tmp_node.inset_left + tmp_node.inset_right));
+    
+              tmp_left.inset_right = tmp_left.inset_right + (tmp_width * ((100 - tmp_left.ratio)  / 100));
+              tmp_right.inset_left = tmp_right.inset_left + (tmp_width * ((100 - tmp_right.ratio) / 100)); //tmp_right.ratio / 100));
+            } else {
+              // R = Row = 세로 = top / bottom
+              let tmp_height = (100 - (tmp_node.inset_top + tmp_node.inset_bottom));
+    
+              tmp_left.inset_bottom = tmp_left.inset_bottom + (tmp_height * ((100 - tmp_left.ratio)  / 100));
+              tmp_right.inset_top   = tmp_right.inset_top   + (tmp_height * ((100 - tmp_right.ratio) / 100)); //tmp_right.ratio / 100));
+            }
           }
         }
-      }
-    });
+      });
 
-    // console.log('inset 재계산 이후');
-    // console.log(arr);
+      // console.log('inset 재계산 이후');
+      // console.log(arr);
 
-    let tmp_el = null;
-    $Mosaic_Arr.forEach(tmp_node => {
-      // 인자가 부모 노드이면(= 노드타입이 C인 경우, 화면에 출력
-      if        (tmp_node.node_type === "C") {
-        tmp_el = document.getElementsByName(tmp_node.id);
-        tmp_el[0].style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
-      } else if (tmp_node.node_type === "P") {
-        tmp_el = document.getElementsByName(tmp_node.id);
-        tmp_el[0].style.inset = `${tmp_node.right.inset_top}% ${tmp_node.right.inset_right}% ${tmp_node.right.inset_bottom}% ${tmp_node.right.inset_left}%`;
-      }
-    });
+      let tmp_el = null;
+      $Mosaic_Arr.forEach(tmp_node => {
+        // 인자가 부모 노드이면(= 노드타입이 C인 경우, 화면에 출력
+        if        (tmp_node.node_type === "C") {
+          tmp_el = document.getElementsByName(tmp_node.id);
+          tmp_el[0].style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+        } else if (tmp_node.node_type === "P") {
+          tmp_el = document.getElementsByName(tmp_node.id);
+          tmp_el[0].style.inset = `${tmp_node.right.inset_top}% ${tmp_node.right.inset_right}% ${tmp_node.right.inset_bottom}% ${tmp_node.right.inset_left}%`;
+        }
+      });
 
-    tmp_target = find_target(e.target);
-    
-    // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
-    if (tmp_target != null){
-      // console.log(tmp_target);
-      // console.log("현재 타깃 명 = " + tmp_target.getAttribute("name"));
-      drop_id = parseInt(tmp_target.getAttribute("name"));
+      tmp_target = find_target(e.target);
+      
+      // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
+      if (tmp_target != null){
+        // console.log(tmp_target);
+        // console.log("현재 타깃 명 = " + tmp_target.getAttribute("name"));
+        drop_id = parseInt(tmp_target.getAttribute("name"));
+      } else {
+        if (e.target.getAttribute("name") === "root") {
+          // console.log("현재 타깃 ID = " + e.target.id);
+          drop_id = parseInt(e.target.id);
+        };
+      };
     } else {
-      if (e.target.getAttribute("name") === "root") {
-        // console.log("현재 타깃 ID = " + e.target.id);
-        drop_id = parseInt(e.target.id);
+      console.log("============" + drag_type + " enter ============");
+
+      // drop_id가 -1이 아니고 나 자신이 아닐때 drag_node의 zindex를 뒤로 보낸다!
+      if ((drop_id !== -1) || (drop_id !== drag_node.id)) {
+        let tmp_el = document.getElementsByName("F" + drag_node.id);
+        tmp_el[0].style.zIndex = "0";
+        // tmp_el[0].style.display = "None";
+      };
+
+      tmp_target = find_target(e.target);
+
+      // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
+      if (tmp_target != null){
+        // console.log(tmp_target);
+        // console.log("현재 타깃 명 = " + tmp_target.getAttribute("name"));
+        drop_id = parseInt(tmp_target.getAttribute("name"));
+      } else {
+        if (e.target.getAttribute("name") === "root") {
+          // console.log("현재 타깃 ID = " + e.target.id);
+          drop_id = parseInt(e.target.id);
+        };
       };
     };
   };
 
   const onDragOver_div_event = (e) => {
+    console.log("==========Drag Over ===========")
     let shadow_div = document.getElementById("shadow");
     let tmp_node   = null;
     let tmp_target = null;
@@ -591,6 +623,7 @@ const onMouseDown_bar_event = (e) => {
   }  
 
   const onDragEnd_div_event = (e) => {  
+    console.log('==============DragEnd===========');
     if (drag_node === null) {
       return false;
     }
@@ -609,6 +642,7 @@ const onMouseDown_bar_event = (e) => {
     // console.log(e.target.parentElement.getAttribute("name"));
 
     //if (e.target.tagName !== "BUTTON") {
+    // Dock Type
     if (drag_node.id !== drop_id) {
       // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
       const change_result = bst.change($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node, drag_state, drag_bleft);
@@ -649,136 +683,280 @@ const onMouseDown_bar_event = (e) => {
 
       // 배열 갱신
       // setArr([...arr]);
-			$Mosaic_Arr = $Mosaic_Arr;
-    }
-    //}
+      $Mosaic_Arr = $Mosaic_Arr;
+    };
+
     drag_node  = null;
     drag_state = "N";
     drag_bleft = false;
     drop_id    = -1;
-  }
+    drag_type  = "";
+  };
 
 // ==================================================================================================================================================
 // ================================================================== Float Event ===================================================================
 // ==================================================================================================================================================  
-	const onMouseDown_Float_Event = (e) => {
-		console.log("==============Float Mouse Down=============");  
+	const onDragStart_Float_Event = (e) => {
+    console.log("Float Drag 시작===============");
 		// const tmp_float_div = document.getElementById("123");
-		const tmp_float_div = e.target.parentElement;
-    let tmp_Item = $Float_Arr[parseInt(e.target.parentElement.getAttribute('name'))];
-		const tmp_offset = { x: 0, y: 0 };
-		tmp_offset.x = e.clientX;
-		tmp_offset.y = e.clientY;
+    const tmp_float_div = e.target.parentElement;
+    const tmp_target_Id = e.target.parentElement.getAttribute('name');
 
-		// console.log('offset X= ' + tmp_offset.x);
-		// console.log('offset y= ' + tmp_offset.y);		
-			
-    tmp_float_div.addEventListener('dragstart', onMouseDragStart_Float_Event);
-    tmp_float_div.addEventListener('drag',      onMouseDrag_Float_Event);
-    tmp_float_div.addEventListener('dragend',   onMouseDragEnd_Float_Event);		
+    console.log("target_Id = " + tmp_target_Id);
+    if (tmp_target_Id){
+      let tmp_Item = $Float_Arr[parseInt(tmp_target_Id.slice(1))];
+      // console.log(tmp_Item);
 
-		function onMouseDragStart_Float_Event(event) {
-			console.log("============Float Mouse Drag Start===========");
-			// event.dataTransfer.dragEffect = "move";
-			// let cv = new ImageBitmap();
-			// cv.width  = 0;
-			// cv.height = 0;
-			// event.dataTransfer.setDragImage(cv, 0, 0);      
-		};
+      if (tmp_Item) {
+        if (tmp_Item.float_type == true) {
+          // Dock에다가 Float Div를 삽입한다.
+          console.log("==============Float -> Dock로 영역 선택=============");
+          // console.log(tmp_Item);
+          // console.log(tmp_Item.id);
 
-		function onMouseDrag_Float_Event(event) {
-			console.log("==============Float Mouse Drag=============");
-			// event.dataTransfer.dragEffect = "move";
-			event.preventDefault();
-			// console.log(event.dataTransfer.dragEffect)
-			// event.dataTransfer.effectAllowed = "move";
-			// console.log(this);
+          // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
+          drag_node  = tmp_Item;
+          drag_state = "N";
+          drag_bleft = false;
+          drop_id    = tmp_Item.id;
+          drag_type  = "Float";
 
-			// let tmp_top  = Math.max((e.clientY - tmp_offset.y), 0);
-			// let tmp_left = Math.max((e.clientX - tmp_offset.x), 0);
-			// tmp_float_div.style.top  = tmp_top  + 'px';
-			// tmp_float_div.style.left = tmp_left + 'px';
+          // 자신을 감춘다.
+          tmp_float_div.style.zIndex = "21";
+          tmp_float_div.style.opacity = "0";
+        } else {
+          // Float 형태로 그냥 떠다니거나
+          console.log("==============Float Move Start=============");
+          console.log("Item = " + tmp_float_div);
 
+          let move_offset_x = 0;
+          let move_offset_y = 0;
 
-		};
+          let new_offset_x = 0;
+          let new_offset_y = 0;
 
-		function onMouseDragEnd_Float_Event(event) {
-			console.log("==============Float Mouse Up=============");
-			let tmp_left = 0;
-			let tmp_top  = 0;
+          // 현재 마우스의 위치와 선택된 Float Div의 위치를 빼서 절대 값을 얻는다.
+          new_offset_x = e.clientX - tmp_float_div.offsetLeft;
+          new_offset_y = e.clientY - tmp_float_div.offsetTop;
 
-			// console.log('Old offset x= ' + tmp_offset.x);
-			// console.log('Old offset y= ' + tmp_offset.y);		
-			// console.log('New clientX= '  + event.clientX);
-			// console.log('New clientY= '  + event.clientY);
+          // console.log('offset X= ' + tmp_offset.x);
+          // console.log('offset y= ' + tmp_offset.y);		
+            
+          tmp_float_div.addEventListener('drag',      onMove_Drag_Float_Event);
+          tmp_float_div.addEventListener('dragend',   onMove_DragEnd_Float_Event);		
+          
+          function onMove_Drag_Float_Event(e) {
+            // console.log("==============Float Moving =============");
+            // e.dataTransfer.dragEffect = "move";
+            e.preventDefault();
 
-			// X / Left 좌표
-			if (tmp_offset.x < event.clientX) {
-				// → or ↓ 방향으로 가면 +
-				tmp_left = Math.max((tmp_float_div.offsetLeft + (event.clientX - tmp_offset.x)), 0);
+            // console.log('Old offset x= ' + tmp_offset.x);
+            // console.log('Old offset y= ' + tmp_offset.y);		
+            // console.log('New clientX= '  + event.clientX);
+            // console.log('New clientY= '  + event.clientY);
 
-			} else {
-				// ← or ↑ 방향으로 가면 -
-				tmp_left = Math.max((tmp_float_div.offsetLeft - (tmp_offset.x - event.clientX)), 0);
-			};
+            if ((e.clientX != 0) && (e.clientY != 0)) {
+              // 이동 내역 계산
+              move_offset_x = Math.max((e.clientX - new_offset_x), 0);
+              move_offset_y = Math.max((e.clientY - new_offset_y), 0);
 
-			// Y / Top 좌표
-			if (tmp_offset.y < event.clientY) {
-				// → or ↓ 방향으로 가면 +
-				tmp_top  = Math.max((tmp_float_div.offsetTop + (event.clientY - tmp_offset.y)), 0);
+              tmp_float_div.style.left = move_offset_x + 'px';
+              tmp_float_div.style.top  = move_offset_y + 'px';
 
-			} else {
-				// ← or ↑ 방향으로 가면 -
-				tmp_top  = Math.max((tmp_float_div.offsetTop - (tmp_offset.y - event.clientY)), 0);
-			};
+              tmp_Item.inset_left = tmp_float_div.offsetLeft;    
+              tmp_Item.inset_top  = tmp_float_div.offsetTop;
 
-			tmp_float_div.style.top  = tmp_top  + 'px';
-			tmp_float_div.style.left = tmp_left + 'px';
+              // console.log($Float_Arr);
+              // console.log(move_offset.x);
+              // console.log(move_offset.y);
+              // console.log("========================");
+              // console.log("offsetLeft = " + tmp_float_div.offsetLeft);
+              // console.log("offsetTop = " + tmp_float_div.offsetTop);
+              // console.log("==========================================");
+              // console.log("style.left=" + tmp_float_div.style.left);
+              // console.log("style.top=" + tmp_float_div.style.top);
+              
+              // tmp_offset.x = event.clientX;
+              // tmp_offset.y = event.clientY;
+            };
+          };
 
-      tmp_Item.inset_top  = tmp_top;
-      tmp_Item.inset_left = tmp_left;
+          function onMove_DragEnd_Float_Event(e) {
+            console.log("==============Float Move End=============");
+            // e.preventDefault();
 
-      // tmp_Item.inset_right  = tmp_float_div.offsetWidth;
-      // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+            // let tmp_left = 0;
+            // let tmp_top  = 0;
 
-			// tmp_float_div.style.top  = event.clientY;
-			// tmp_float_div.style.left = event.clientX;
+            // // console.log('Old offset x= ' + tmp_offset.x);
+            // // console.log('Old offset y= ' + tmp_offset.y);		
+            // // console.log('New clientX= '  + event.clientX);
+            // // console.log('New clientY= '  + event.clientY);
 
-			tmp_float_div.removeEventListener('dragstart', onMouseDragStart_Float_Event);
-			tmp_float_div.removeEventListener('drag',      onMouseDrag_Float_Event);
-			tmp_float_div.removeEventListener('dragend',   onMouseDragEnd_Float_Event);
-		};
+            // // X / Left 좌표
+            // if (tmp_offset.x < event.clientX) {
+            //   // → or ↓ 방향으로 가면 +
+            //   tmp_left = Math.max((tmp_float_div.offsetLeft + (event.clientX - tmp_offset.x)), 0);
+
+            // } else {
+            //   // ← or ↑ 방향으로 가면 -
+            //   tmp_left = Math.max((tmp_float_div.offsetLeft - (tmp_offset.x - event.clientX)), 0);
+            // };
+
+            // // Y / Top 좌표
+            // if (tmp_offset.y < event.clientY) {
+            //   // → or ↓ 방향으로 가면 +
+            //   tmp_top  = Math.max((tmp_float_div.offsetTop + (event.clientY - tmp_offset.y)), 0);
+
+            // } else {
+            //   // ← or ↑ 방향으로 가면 -
+            //   tmp_top  = Math.max((tmp_float_div.offsetTop - (tmp_offset.y - event.clientY)), 0);
+            // };
+
+            // tmp_float_div.style.top  = tmp_top  + 'px';
+            // tmp_float_div.style.left = tmp_left + 'px';
+
+            // tmp_Item.inset_top  = tmp_top;
+            // tmp_Item.inset_left = tmp_left;
+
+            // tmp_Item.inset_right  = tmp_float_div.offsetWidth;
+            // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+
+            // tmp_float_div.style.top  = event.clientY;
+            // tmp_float_div.style.left = event.clientX;
+
+            tmp_float_div.removeEventListener('drag',      onMove_Drag_Float_Event);
+            tmp_float_div.removeEventListener('dragend',   onMove_DragEnd_Float_Event);
+          };
+        };
+      };
+    };
 	};  
+
+  const onDrag_DragEnd_Float_Event = (e) => {
+    console.log('==============Float Div DragEnd===========');
+    if (drag_node === null) {
+      // 아무 선택 안됬으면 다시 보여줘?
+      return false;
+    }
+    // e.preventDefault();
+
+    let shadow_div = document.getElementById("shadow");
+
+    // 쉐도우 박스 뒤로 숨기고
+    shadow_div.style.display = 'none';
+    shadow_div.style.zIndex  = "-1";
+
+    // Dock Type에 하나를 추가해주고 
+    const insert_result = bst.insert_Dock($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node.chart_type);
+    if (insert_result) {
+      idx = idx + 2;
+
+      $Mosaic_Arr.push(insert_result[0]);
+      $Mosaic_Arr.push(insert_result[1]);
+
+      // 부모의 inset 값 Copy 해서 자식들한테 넣어주고
+      bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[0]);
+      bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[1]);      
+
+      // 재자리 넣어주고 
+      // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
+      const change_result = bst.change($Mosaic_Arr[insert_result[0].id], $Mosaic_Arr.length, insert_result[1], drag_state, drag_bleft);
+      if (change_result) {
+        $Mosaic_Arr.push(change_result[0]);
+        $Mosaic_Arr.push(change_result[1]);
+      };
+
+      // 기존 배열에서 inset 값을 변경 후 가져와야한다.
+      // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
+      //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+      // } else {
+      //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+      // }       
+      if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[change_result[1].id].p_id].p_id]) {
+        bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[change_result[1].id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[change_result[1].id].p_id], $Mosaic_Arr[change_result[1].id]);
+      } else {
+        bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[change_result[1].id].p_id], $Mosaic_Arr[change_result[1].id]);
+      };
+
+      // inset 재조정
+      bst.resize_div($Mosaic_Arr);
+
+      // Float Arr 에서 나를 지운다.
+      // Float 배열 갱신
+      Del_Div_Float(drag_node);
+
+      // Dock 배열 갱신
+      // setArr([...arr]);
+      $Mosaic_Arr = $Mosaic_Arr;
+
+      // console.log("==============Drop after Log=============");
+      console.log($Mosaic_Arr);
+      console.log($Float_Arr);
+    };
+
+    // 기존 배열에서 inset 값을 변경 후 가져와야한다.
+    // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
+    //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+    // } else {
+    //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+    // } 
+    // // drag_node = null;
+    // // inset 재조정
+    // bst.resize_div($Mosaic_Arr);
+
+    drag_node  = null;
+    drag_state = "N";
+    drag_bleft = false;
+    drop_id    = -1;
+    drag_type  = ""; 
+  };
 
   const onResize_Start_Float_Event = (e) => {
     // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
     console.log("=============Resize_Start_Float==========="); 
 
-		const tmp_float_div = e.target;
-    let tmp_Item = $Float_Arr[parseInt(e.target.getAttribute('name'))];
+      const tmp_float_div = e.target;
+    let tmp_id = e.target.getAttribute('name');
+    console.log(tmp_id);
 
-    // tmp_Item.inset_right = tmp_float_div.offsetWidth;
-    // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
+    if (tmp_id){
+      let tmp_Item = $Float_Arr[parseInt(tmp_id.slice(1))];
 
-    console.log(e.target);
-    console.log($Float_Arr);
+      // tmp_Item.inset_right = tmp_float_div.offsetWidth;
+      // tmp_Item.inset_bottom = tmp_float_div.offsetHeight;
 
-    if (tmp_Item) {
       tmp_float_div.addEventListener('mouseup', onResize_End_Float_Event);
-    };
 
-    function onResize_End_Float_Event(e) {
-      // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
-      console.log("=============Resize_End_Float==========="); 
+      function onResize_End_Float_Event(e) {
+        // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
+        console.log("=============Resize_End_Float==========="); 
 
-      tmp_Item.inset_right = tmp_float_div.clientWidth;
-      tmp_Item.inset_bottom = tmp_float_div.clientHeight;
+        tmp_Item.inset_right = tmp_float_div.clientWidth;
+        tmp_Item.inset_bottom = tmp_float_div.clientHeight;
 
-      console.log(e.target);
-      console.log($Float_Arr);
+        console.log(e.target);
+        console.log($Float_Arr);
 
-      tmp_float_div.removeEventListener('mouseup', onResize_End_Float_Event);    
-    };
+        tmp_float_div.removeEventListener('mouseup', onResize_End_Float_Event);    
+      };
+    }
+  };
+
+
+
+
+
+
+
+
+  const Change_Float_Drag = (e) => {
+		const tmp_float_div = e.target.parentElement.parentElement;
+    let tmp_id   = e.target.parentElement.parentElement.getAttribute('name');
+    let tmp_Item = $Float_Arr[parseInt(tmp_id.slice(1))];
+
+    console.log(e.target.parentElement.parentElement.parentElement);
+    console.log(tmp_Item);
   };
 
 
@@ -820,7 +998,7 @@ const onMouseDown_bar_event = (e) => {
     {/each}
   </select>
 
-  <select bind:value={select_chart} id="component_type" style="width: 100px;">
+  <select bind:value={select_chart} id="chart_type" style="width: 100px;">
     {#each chart_type as type, index}
       <option value={index}>
         {type.text}
@@ -874,10 +1052,16 @@ const onMouseDown_bar_event = (e) => {
             style={"inset: " + `${item.left.inset_top}% ${item.left.inset_right}% ${item.left.inset_bottom}% ${item.left.inset_left}%`}
           >
             <div class="div_Title" draggable="true" on:dragstart={onDragStart_div_event}>
-              <!-- <button on:click={Add_Div} id={item.left.id}>추가</button> -->
-              <button on:click={()=>{Del_Div_Dock(item.left)}}>X</button>
+              <div class="div_Title_Check">
+              </div>
+    
+              <div class="button_Area">
+                <!-- <button on:click={Add_Div} id={item.left.id}>추가</button> -->
+                <button on:click={()=>{Del_Div_Dock(item.left)}}>X</button>
+              </div>              
             </div>
             <div class="div_Body">
+              {item.left.chart_type}
               <!-- {item.left.node_text}
               {#if      (item.left.node_text == "Grid")}
                 <Grid data={item.left.arr_Data} />
@@ -895,10 +1079,16 @@ const onMouseDown_bar_event = (e) => {
           style={"inset: " + `${item.right.inset_top}% ${item.right.inset_right}% ${item.right.inset_bottom}% ${item.right.inset_left}%`}
           >
             <div class="div_Title" draggable="true" on:dragstart={onDragStart_div_event}>
-              <!-- <button on:click={Add_Div} id={item.right.id}>추가</button> -->
-              <button on:click={()=>{Del_Div_Dock(item.right)}}>X</button>
+              <div class="div_Title_Check">
+              </div>
+    
+              <div class="button_Area">
+                <!-- <button on:click={Add_Div} id={item.right.id}>추가</button> -->
+                <button on:click={()=>{Del_Div_Dock(item.right)}}>X</button>
+              </div>
             </div>
             <div class="div_Body">
+              {item.right.chart_type}
               <!-- {#if      (item.right.node_text == "Grid")}
                 <Grid data={item.right.arr_Data} />
               {:else if (item.right.node_text == "Pie Chart")}
@@ -917,11 +1107,17 @@ const onMouseDown_bar_event = (e) => {
           class="div_Background" name={item.id} on:dragover={onDragOver_div_event} on:dragend={onDragEnd_div_event} on:dragenter={onDragenter_div_event}
           style={"inset: " + `${item.inset_top}% ${item.inset_right}% ${item.inset_bottom}% ${item.inset_left}%`}
         >
-          <div class="div_Title" style={"cursor: " + 'default'}>
-            <!-- <button on:click={Add_Div} id={item.id}>추가</button> -->
-            <button on:click={()=>{Del_Div_Dock(item)}}>X</button>
+          <div class="div_Title"  draggable="true" style={"cursor: " + 'default'}>
+            <div class="div_Title_Check">
+            </div>
+  
+            <div class="button_Area">
+              <!-- <button on:click={Add_Div} id={item.id}>추가</button> -->
+              <button on:click={()=>{Del_Div_Dock(item)}}>X</button>
+            </div>
           </div>
           <div class="div_Body">
+            {item.chart_type}
             <!-- {#if      (item.node_text == "Grid")}
               <Grid data={item.arr_Data} />
             {:else if (item.node_text == "Pie Chart")}
@@ -939,17 +1135,25 @@ const onMouseDown_bar_event = (e) => {
     <!-- {console.log(index)} -->
     <!-- {arr[5].arr_Data} -->
       <div
-      class="div_Float_Background" name={item.id} on:mousedown={onResize_Start_Float_Event} 
+      class="div_Float_Background" name={"F"+item.id} on:mousedown={onResize_Start_Float_Event} on:dragend={onDrag_DragEnd_Float_Event}
       style={"top: " + `${item.inset_top}px;` + " left: " + `${item.inset_left}px;` +  " width: " + `${item.inset_right}px;` + " height: " + `${item.inset_bottom}px;`}
       >
-        <div class="div_Title" draggable="true" on:mousedown={onMouseDown_Float_Event}>
+        <div class="div_Title" draggable="true" on:mousedown|stopPropagation={()=>{}} on:dragstart={onDragStart_Float_Event} >
           <!-- <button on:click={Add_Div}>N</button>
           <button on:click={Add_Div}>D</button> -->
-          <button>N</button>
-          <button>D</button>          
-          <button on:click={()=>{Del_Div_Float(item)}}>X</button>
+          <div class="div_Title_Check">
+            <!-- <input type="checkbox"  style="display:flex;" checked={item.float_type} on:change={(e) => Change_Float_Drag(checked)}/> -->
+            <input type="checkbox" style="display:flex;" bind:checked={item.float_type} />
+          </div>
+
+          <div class="button_Area">
+            <button on:mousedown|stopPropagation={()=>{}}>N</button>
+            <button on:mousedown|stopPropagation={()=>{}}>D</button>
+            <button on:mousedown|stopPropagation={()=>{}} on:click={()=>{Del_Div_Float(item)}}>X</button>
+          </div>
         </div>
         <div class="div_Body">
+          {item.chart_type}
           <!-- {item.left.node_text}
           {#if      (item.left.node_text == "Grid")}
             <Grid data={item.left.arr_Data} />
