@@ -230,6 +230,21 @@ const Add_Div = (e) => {
     $Float_Arr = $Float_Arr;
   };  
 
+  const Change_Dock_To_Float = (item) => {
+    // Dock Node의 정보를 Float 배열에 Add 하고 
+    const change_dock_result = bst.insert_Float($Float_Arr.length, item.chart_type);
+
+    if (change_dock_result) {
+      $Float_Arr.push(change_dock_result);
+
+      // Dock 배열에서 본인을 지운다.
+      Del_Div_Dock(item);
+
+      // 배열 갱신
+      $Float_Arr = $Float_Arr;
+    };
+  };
+
   // const Changes = () => {
   //   console.log('===========Arr 변경===========');
 
@@ -508,7 +523,7 @@ const onMouseDown_bar_event = (e) => {
       if ((drop_id !== -1) || (drop_id !== drag_node.id)) {
         let tmp_el = document.getElementsByName("F" + drag_node.id);
         tmp_el[0].style.zIndex = "0";
-        // tmp_el[0].style.display = "None";
+        // tmp_el[0].style.display = "none";
       };
 
       tmp_target = find_target(e.target);
@@ -599,23 +614,31 @@ const onMouseDown_bar_event = (e) => {
     // console.log("여기까지");
 
     // 현재 마우스의 X, Y 좌표에 따라, 어떤 구역에 속해있는지 확인해서 쉐도우 DIV를 뿌려준다.
-    switch (drag_state) {
-      case "T":
-        shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_left}%`;
-        break;
-      case "R":
-        shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}%`;
-        break;
-      case "B":
-        shadow_div.style.inset = `${tmp_node.inset_top + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
-        break;
-      // default: // L
-      case "L":
-        shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
-        break;
-    }          
-    shadow_div.style.display = 'block';
-    shadow_div.style.zIndex  = "100";
+    if (drag_state == "N")
+    {
+      shadow_div.style.display = 'none';
+      shadow_div.style.zIndex  = "0";
+    } else
+    {
+      switch (drag_state) {
+        case "T":
+          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_left}%`;
+          break;
+        case "R":
+          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}%`;
+          break;
+        case "B":
+          shadow_div.style.inset = `${tmp_node.inset_top + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+          break;
+        // default: // L
+        case "L":
+          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+          break;
+      }        
+
+      shadow_div.style.display = 'block';
+      shadow_div.style.zIndex  = "100";
+    };
 
     // console.log(tmp_position);
     // console.log(drag_state);
@@ -711,6 +734,17 @@ const onMouseDown_bar_event = (e) => {
       {
         if (tmp_Item.float_type == true)
         {
+          // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
+          drag_node  = tmp_Item;
+          drag_state = "N";
+          drag_bleft = false;
+          drop_id    = tmp_Item.id;
+          drag_type  = "Float";
+
+          // 자신을 감춘다.
+          tmp_float_div.style.zIndex = "21";
+          tmp_float_div.style.opacity = "0";
+
           // Dock 할 영역이 없으면 진행할 수 없...... 없나? 이게 Root가 되는거 아니야?
           if ($Mosaic_Arr.length > 0) 
           {
@@ -719,16 +753,23 @@ const onMouseDown_bar_event = (e) => {
             // console.log(tmp_Item);
             // console.log(tmp_Item.id);
 
-            // 마우스 Over 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
-            drag_node  = tmp_Item;
-            drag_state = "N";
-            drag_bleft = false;
-            drop_id    = tmp_Item.id;
-            drag_type  = "Float";
+          } else {
+            console.log("==============Float -> Root로 영역 선택=============");
 
-            // 자신을 감춘다.
-            tmp_float_div.style.zIndex = "21";
-            tmp_float_div.style.opacity = "0";
+            let shadow_div = document.getElementById("shadow");
+            shadow_div.style.inset = '0%';
+            shadow_div.style.display = 'block';
+            shadow_div.style.zIndex  = "100";
+          };
+
+          tmp_float_div.addEventListener('drag',      onDrag_Drag_Float_Event);
+
+          function onDrag_Drag_Float_Event(e) {
+            // 나의 width를 수정한다.
+            tmp_float_div.style.width = "1px";
+            tmp_float_div.style.height = "1px";
+
+            tmp_float_div.removeEventListener('drag',   onDrag_Drag_Float_Event);
           };
         }
         else 
@@ -843,87 +884,110 @@ const onMouseDown_bar_event = (e) => {
 
   const onDrag_DragEnd_Float_Event = (e) => {
     console.log('==============Float DragEnd===========');
-    if (drag_node === null) {
-      // 아무 선택 안됬으면 다시 보여줘?
-      return false;
-    }
     // e.preventDefault();
+    console.log(drag_node);
 
-    let shadow_div = document.getElementById("shadow");
+    if ((drag_node != null) && (drag_node.float_type == true))
+    {
+      // 쉐도우 박스 뒤로 숨기고
+      let shadow_div = document.getElementById("shadow");
+      shadow_div.style.display = 'none';
+      shadow_div.style.zIndex  = "-1";
 
-    // 쉐도우 박스 뒤로 숨기고
-    shadow_div.style.display = 'none';
-    shadow_div.style.zIndex  = "-1";
+      // Root가 없는데 Dock 타입으로 드레그를 했으면 Root를 만들고 자기 자신을 지운다.
+      if ($Mosaic_Arr.length == 0) {
+        // root 인 경우는 Dock 
+        bst.root = new Node(idx, "N", "C", "Dock", false, select_chart, 0, 0, 0, 0, 100);
+        
+        $Mosaic_Arr = [bst.root];
 
-    // Dock Type에 하나를 추가해주고 
-    const insert_result = bst.insert_Dock($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node.chart_type);
-    if (insert_result) {
-      idx = idx + 2;
-
-      $Mosaic_Arr.push(insert_result[0]);
-      $Mosaic_Arr.push(insert_result[1]);
-
-      // 부모의 inset 값 Copy 해서 자식들한테 넣어주고
-      // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[0]);
-      // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[1]);      
-
-      // 재자리 넣어주고 
-      // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
-      console.log("insert_result[0].id = " + insert_result[0].id);
-      console.log("insert_result[1].id = " + insert_result[1].id);
-
-      const change_result = bst.change($Mosaic_Arr[insert_result[0].id], $Mosaic_Arr.length, insert_result[1], drag_state, drag_bleft);
-      if (change_result) {
-        $Mosaic_Arr.push(change_result[0]);
-        $Mosaic_Arr.push(change_result[1]);
-      };
-
-      // 기존 배열에서 inset 값을 변경 후 가져와야한다.
-      // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
-      //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-      // } else {
-      //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-      // }       
-      console.log("change_result[0].id = " + change_result[0].id);
-      console.log("change_result[1].id = " + change_result[1].id);
-
-      if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id]) {
-        bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+        // Float Arr 에서 나를 지운다.
+        // Float 배열 갱신
+        Del_Div_Float(drag_node);      
       } else {
-        bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+        if (drag_state == 'N') {
+          // 아무 선택 안됬으면 다시 보여줘?
+          // 엘리먼트 찾기
+          const tmp_float_div = document.getElementsByName("F" + drag_node.id);
+          tmp_float_div[0].style.width   = drag_node.inset_right + "px";
+          tmp_float_div[0].style.height  = drag_node.inset_bottom + "px";
+          tmp_float_div[0].style.display = 'block';
+          tmp_float_div[0].style.zIndex  = "20";
+          tmp_float_div[0].style.opacity = "1";
+        } else
+        {
+          // Dock Type에 하나를 추가해주고 
+          const insert_result = bst.insert_Dock($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node.chart_type);
+          if (insert_result) {
+            idx = idx + 2;
+
+            $Mosaic_Arr.push(insert_result[0]);
+            $Mosaic_Arr.push(insert_result[1]);
+
+            // 부모의 inset 값 Copy 해서 자식들한테 넣어주고
+            // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[0]);
+            // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[1]);      
+
+            // 재자리 넣어주고 
+            // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
+            console.log("insert_result[0].id = " + insert_result[0].id);
+            console.log("insert_result[1].id = " + insert_result[1].id);
+
+            const change_result = bst.change($Mosaic_Arr[insert_result[0].id], $Mosaic_Arr.length, insert_result[1], drag_state, drag_bleft);
+            if (change_result) {
+              $Mosaic_Arr.push(change_result[0]);
+              $Mosaic_Arr.push(change_result[1]);
+            };
+
+            // 기존 배열에서 inset 값을 변경 후 가져와야한다.
+            // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
+            //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+            // } else {
+            //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+            // }       
+            console.log("change_result[0].id = " + change_result[0].id);
+            console.log("change_result[1].id = " + change_result[1].id);
+
+            if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id]) {
+              bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+            } else {
+              bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+            };
+
+            // inset 재조정
+            bst.resize_div($Mosaic_Arr);
+
+            // Float Arr 에서 나를 지운다.
+            // Float 배열 갱신
+            Del_Div_Float(drag_node);
+
+            // Dock 배열 갱신
+            // setArr([...arr]);
+            $Mosaic_Arr = $Mosaic_Arr;
+
+            // console.log("==============Drop after Log=============");
+            console.log($Mosaic_Arr);
+            console.log($Float_Arr);
+          };
+
+          // 기존 배열에서 inset 값을 변경 후 가져와야한다.
+          // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
+          //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+          // } else {
+          //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+          // } 
+          // // drag_node = null;
+          // // inset 재조정
+          // bst.resize_div($Mosaic_Arr);
+        };
       };
 
-      // inset 재조정
-      bst.resize_div($Mosaic_Arr);
-
-      // Float Arr 에서 나를 지운다.
-      // Float 배열 갱신
-      Del_Div_Float(drag_node);
-
-      // Dock 배열 갱신
-      // setArr([...arr]);
-      $Mosaic_Arr = $Mosaic_Arr;
-
-      // console.log("==============Drop after Log=============");
-      console.log($Mosaic_Arr);
-      console.log($Float_Arr);
+      drag_node  = null;
+      drag_state = "N";
+      drag_bleft = false;
+      drop_id    = -1;
+      drag_type  = "";
     };
-
-    // 기존 배열에서 inset 값을 변경 후 가져와야한다.
-    // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
-    //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-    // } else {
-    //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-    // } 
-    // // drag_node = null;
-    // // inset 재조정
-    // bst.resize_div($Mosaic_Arr);
-
-    drag_node  = null;
-    drag_state = "N";
-    drag_bleft = false;
-    drop_id    = -1;
-    drag_type  = ""; 
   };
 
   const onResize_Start_Float_Event = (e) => {
@@ -1066,11 +1130,13 @@ const onMouseDown_bar_event = (e) => {
             style={"inset: " + `${item.left.inset_top}% ${item.left.inset_right}% ${item.left.inset_bottom}% ${item.left.inset_left}%`}
           >
             <div class="div_Title" draggable="true" on:dragstart={onDragStart_div_event}>
-              <div class="div_Title_Check">
+              <div class="div_Title_Area">
               </div>
     
               <div class="button_Area">
                 <!-- <button on:click={Add_Div} id={item.left.id}>추가</button> -->
+                <button on:click={()=>{}}>N</button>
+                <button on:click={()=>{Change_Dock_To_Float(item.left)}}>F</button>       
                 <button on:click={()=>{Del_Div_Dock(item.left)}}>X</button>
               </div>              
             </div>
@@ -1093,11 +1159,13 @@ const onMouseDown_bar_event = (e) => {
           style={"inset: " + `${item.right.inset_top}% ${item.right.inset_right}% ${item.right.inset_bottom}% ${item.right.inset_left}%`}
           >
             <div class="div_Title" draggable="true" on:dragstart={onDragStart_div_event}>
-              <div class="div_Title_Check">
+              <div class="div_Title_Area">
               </div>
     
               <div class="button_Area">
                 <!-- <button on:click={Add_Div} id={item.right.id}>추가</button> -->
+                <button on:click={()=>{}}>N</button>
+                <button on:click={()=>{Change_Dock_To_Float(item.right)}}>F</button>        
                 <button on:click={()=>{Del_Div_Dock(item.right)}}>X</button>
               </div>
             </div>
@@ -1122,11 +1190,13 @@ const onMouseDown_bar_event = (e) => {
           style={"inset: " + `${item.inset_top}% ${item.inset_right}% ${item.inset_bottom}% ${item.inset_left}%`}
         >
           <div class="div_Title"  draggable="true" style={"cursor: " + 'default'}>
-            <div class="div_Title_Check">
+            <div class="div_Title_Area">
             </div>
   
             <div class="button_Area">
               <!-- <button on:click={Add_Div} id={item.id}>추가</button> -->
+              <button on:click={()=>{}}>N</button>
+              <button on:click={()=>{Change_Dock_To_Float(item)}}>F</button>
               <button on:click={()=>{Del_Div_Dock(item)}}>X</button>
             </div>
           </div>
@@ -1155,14 +1225,13 @@ const onMouseDown_bar_event = (e) => {
         <div class="div_Title" draggable="true" on:mousedown|stopPropagation={()=>{}} on:dragstart={onDragStart_Float_Event} >
           <!-- <button on:click={Add_Div}>N</button>
           <button on:click={Add_Div}>D</button> -->
-          <div class="div_Title_Check">
+          <div class="div_Title_Area">
             <!-- <input type="checkbox"  style="display:flex;" checked={item.float_type} on:change={(e) => Change_Float_Drag(checked)}/> -->
             <input type="checkbox" style="display:flex;" bind:checked={item.float_type} />
           </div>
 
           <div class="button_Area">
             <button on:mousedown|stopPropagation={()=>{}}>N</button>
-            <button on:mousedown|stopPropagation={()=>{}}>D</button>
             <button on:mousedown|stopPropagation={()=>{}} on:click={()=>{Del_Div_Float(item)}}>X</button>
           </div>
         </div>
