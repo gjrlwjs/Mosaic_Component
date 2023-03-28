@@ -123,10 +123,11 @@
 
 <!-- HTML -->
 <div id="div_mosaic">
-  <Router>
+  <!-- <Router>
     <Route path="/" component={Mosaic} />
     <Route path="/sub" component={Sub_Window} />
-  </Router>
+  </Router> -->
+  <Mosaic />
 </div>	
 
 
