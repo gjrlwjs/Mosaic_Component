@@ -146,12 +146,6 @@ button {
   cursor: move;
 }
 
-.div_Title:active {
-  cursor: grabbing;
-  cursor: -moz-grabbing;
-  cursor: -webkit-grabbing;
-}
-
 .button_Area {
   display: flex;
   justify-content: center;
@@ -204,8 +198,8 @@ button {
   background-color: rgb(76, 79, 85);
 }
 
-div:active {
+/* div:active {
   cursor: grabbing;
   cursor: -moz-grabbing;
   cursor: -webkit-grabbing;
-}
+} */

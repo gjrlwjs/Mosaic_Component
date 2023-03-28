@@ -1,5 +1,7 @@
 // class Node {
-import { Mosaic_Arr } from "./store.js";
+import { Mosaic_Arr, Float_Arr } from "./store.js";
+
+const ADD_DIV_DEFAULT_PX = 43;
 
 export class Node {
   constructor(
@@ -173,11 +175,43 @@ export class Binary_Tree {
   // Right가 생길 때, Left가 null 일 수는 없다. 이때는 노드 자체를 삭제하고 상위 부모 자리에 Right 노드 정보를 넣어주어야한다.
   // 기존 Tree에서 Left에 새로 추가되는 내용을 반환해야한다.
   // Root를 제외한 기본형임.
-  insert_Float(new_id, c_type) {
+  insert_Float(aArr, c_type) {
     console.log("===========insert Float Node 1회============");
 
+    let tmp_Inset_Top = Math.floor(window.innerHeight * 0.5 - 400 / 2);
+    let tmp_Inset_Left = Math.floor(window.innerWidth * 0.5 - 700 / 2);
+
+    let tmp_Top_Scale = 0;
+    let tmp_Left_Scale = 0;
+
+    let tmp_Total_Top = tmp_Inset_Top;
+    let tmp_Total_Left = tmp_Inset_Left;
+
+    if (aArr.length > 0) {
+      // 현재 존재하는 Float Arr의 Item들 중, 기본값 Left/Top 또는 *n 의 수치가 더해진 내용이 있는지 체크하고 없는 수순에 넣기.
+      aArr.forEach((tmp_node) => {
+        // 비교 대상으로 적합한지 판단한다.
+        // 현재 비교대상이 나보다 다 크냐?
+        if (tmp_node.inset_top - tmp_Total_Top >= 0 && tmp_node.inset_left - tmp_Total_Left >= 0) {
+          // 배율 상 딱 떨어지냐?
+          if ((tmp_node.inset_top - tmp_Total_Top) % ADD_DIV_DEFAULT_PX == 0 && (tmp_node.inset_left - tmp_Total_Left) % ADD_DIV_DEFAULT_PX == 0) {
+            // Top / Left 의 몫이 1:1로 배율이 일치하냐?
+            tmp_Top_Scale = (tmp_node.inset_top - tmp_Total_Top) / ADD_DIV_DEFAULT_PX;
+            tmp_Left_Scale = (tmp_node.inset_left - tmp_Total_Left) / ADD_DIV_DEFAULT_PX;
+
+            // if (tmp_Top_Scale == tmp_Left_Scale && tmp_Top_Scale > 0) {
+            if (tmp_Top_Scale == tmp_Left_Scale) {
+              tmp_Total_Top = tmp_Total_Top + ADD_DIV_DEFAULT_PX * (tmp_Top_Scale + 1);
+              tmp_Total_Left = tmp_Total_Left + ADD_DIV_DEFAULT_PX * (tmp_Left_Scale + 1);
+            }
+          }
+        }
+      });
+    }
+
     // 독립적인 노드를 생성해서 반환한다.
-    const new_node = new Node(new_id, "N", "C", "Float", true, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
+    // const new_node = new Node(aArr.length, "N", "C", "Float", true, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
+    const new_node = new Node(aArr.length, "N", "C", "Float", true, c_type, tmp_Total_Top, 700, 400, tmp_Total_Left, 50);
 
     // console.log(window.innerWidth);
     // console.log(window.innerHeight);

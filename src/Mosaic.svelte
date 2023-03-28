@@ -11,8 +11,9 @@
   import { loop_guard } from 'svelte/internal';
   import sub_Window from './Sub_window.svelte';
 
-	const bst = new Binary_Tree();
+  const bst = new Binary_Tree();
 	let idx = 0;
+  let last_z_index = 21;
 	// let arr = [];
   // export let arr = [];
   // let arr = [];
@@ -64,6 +65,26 @@
 
     return currentElement;
   };
+
+  function Find_Focus_Background(e) {
+    // let currentElement = document.activeElement;
+    let currentElement = e;
+    console.log(currentElement);
+    // while (isNaN(parseInt(currentElement.getAttribute('name')))) {
+    while (currentElement.className !== "div_Float_Background") {
+      currentElement = currentElement.parentElement;
+
+      console.log(currentElement);
+      if (currentElement.tagName == "BODY") {
+        return null;
+      }
+      // console.log(currentElement.name);
+      // console.log(currentElement.getAttribute('name'));    
+    };
+
+    return currentElement;
+  };
+
 
   function find_Node() {
     let tmp_id = 0;
@@ -154,7 +175,7 @@ const Add_Div = (e) => {
     } else {
       // 아닌 경우는 무조건 Float
       // Float Div 추가하기
-      const insert_result = bst.insert_Float($Float_Arr.length, select_chart);
+      const insert_result = bst.insert_Float($Float_Arr, select_chart);
 
       if (insert_result) {
         // idx = idx + 2;
@@ -221,10 +242,14 @@ const Add_Div = (e) => {
     // 기존 배열에서 해당 노드를 삭제한다.
     $Float_Arr.splice(e.id, 1);
 
-    $Float_Arr.forEach((tmp_float_node, index) => {
-      // 삭제에 의해 ID가 재정립 되어야한다.
-      tmp_float_node.id = index;
-    });
+    if ($Float_Arr.length == 0) {
+      last_z_index = 20;
+    } else {
+      $Float_Arr.forEach((tmp_float_node, index) => {
+        // 삭제에 의해 ID가 재정립 되어야한다.
+        tmp_float_node.id = index;
+      });
+    }
 
     // 배열 갱신
     $Float_Arr = $Float_Arr;
@@ -232,7 +257,7 @@ const Add_Div = (e) => {
 
   const Change_Dock_To_Float = (item) => {
     // Dock Node의 정보를 Float 배열에 Add 하고 
-    const change_dock_result = bst.insert_Float($Float_Arr.length, item.chart_type);
+    const change_dock_result = bst.insert_Float($Float_Arr, item.chart_type);
 
     if (change_dock_result) {
       $Float_Arr.push(change_dock_result);
@@ -774,6 +799,8 @@ const onMouseDown_bar_event = (e) => {
 	const onDragStart_Float_Event = (e) => {
     console.log("Float Drag 시작===============");
 
+    Inc_Zindex(e);
+
 		// const tmp_float_div = document.getElementById("123");
     const tmp_float_div = e.target.parentElement;
     const tmp_target_Id = e.target.parentElement.getAttribute('name');
@@ -1051,9 +1078,10 @@ const onMouseDown_bar_event = (e) => {
 
   const onResize_Start_Float_Event = (e) => {
     // Float 타입의 Div가 크기 조절이 끝났을 때, Width 와 Height 값을 받아다가 Inset에 Update 해준다.
-    console.log("=============Resize_Start_Float==========="); 
+    console.log("=============Resize_Start_Float===========");
+    Inc_Zindex(e);
 
-      const tmp_float_div = e.target;
+    const tmp_float_div = e.target;
     let tmp_id = e.target.getAttribute('name');
     console.log(tmp_id);
 
@@ -1080,9 +1108,15 @@ const onMouseDown_bar_event = (e) => {
     }
   };
 
+  const Inc_Zindex = (e) => {
+    last_z_index++;
 
+    let focus_element = Find_Focus_Background(e.target);
 
-
+    if (focus_element) {
+      focus_element.style.zIndex = String(last_z_index);
+    }
+  };
 
 
 
@@ -1387,8 +1421,8 @@ const onMouseDown_bar_event = (e) => {
           </div>
 
           <div class="button_Area">
-            <button on:mousedown|stopPropagation={()=>{}} on:click={()=>open_Modal(item)}>N</button>
-            <button on:mousedown|stopPropagation={()=>{}} on:click={()=>{Del_Div_Float(item)}}>X</button>
+            <button on:mousedown|stopPropagation={Inc_Zindex} on:click={()=>open_Modal(item)}>N</button>
+            <button on:mousedown|stopPropagation={Inc_Zindex} on:click={()=>{Del_Div_Float(item)}}>X</button>
           </div>
         </div>
         <div class="div_Body">
