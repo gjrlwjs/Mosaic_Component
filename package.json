@@ -20,6 +20,8 @@
     "gh-pages": "^5.0.0",
     "gridjs": "^5.1.0",
     "gridjs-svelte": "^2.1.1",
+    "svelte-router": "^3.0.0-alpha.2",
+    "svelte-routing": "^1.6.0",
     "svelte-tabs": "^1.1.0",
     "svelte-tree-view-component": "^1.0.3",
     "svrollbar": "^0.12.0"

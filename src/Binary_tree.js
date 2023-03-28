@@ -11,6 +11,7 @@ export class Node {
     window_type = "Float", // Form Type(Dock / Float)
     float_type = true, // Float Type(false / true)
     chart_type = 0, // Chart Type 0 ~ 9
+    z_index = 0, // Float Type의 zindex
 
     inset_top = 0,
     inset_right = 0,
@@ -28,6 +29,7 @@ export class Node {
     this.window_type = window_type;
     this.float_type = float_type;
     this.chart_type = chart_type;
+    this.z_index = z_index;
 
     this.inset_top = inset_top;
     this.inset_right = inset_right;
@@ -87,6 +89,7 @@ export class Binary_Tree {
       old_node.window_type,
       old_node.float_type,
       old_node.chart_type,
+      0,
       old_node.inset_top,
       old_node.inset_right,
       old_node.inset_bottom,
@@ -103,6 +106,7 @@ export class Binary_Tree {
       "Dock",
       old_node.float_type,
       c_type,
+      0,
       old_node.inset_top,
       old_node.inset_right,
       old_node.inset_bottom,
@@ -175,7 +179,7 @@ export class Binary_Tree {
   // Right가 생길 때, Left가 null 일 수는 없다. 이때는 노드 자체를 삭제하고 상위 부모 자리에 Right 노드 정보를 넣어주어야한다.
   // 기존 Tree에서 Left에 새로 추가되는 내용을 반환해야한다.
   // Root를 제외한 기본형임.
-  insert_Float(aArr, c_type) {
+  insert_Float(aArr, c_type, z_index) {
     console.log("===========insert Float Node 1회============");
 
     let tmp_Inset_Top = Math.floor(window.innerHeight * 0.5 - 400 / 2);
@@ -211,7 +215,7 @@ export class Binary_Tree {
 
     // 독립적인 노드를 생성해서 반환한다.
     // const new_node = new Node(aArr.length, "N", "C", "Float", true, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
-    const new_node = new Node(aArr.length, "N", "C", "Float", true, c_type, tmp_Total_Top, 700, 400, tmp_Total_Left, 50);
+    const new_node = new Node(aArr.length, "N", "C", "Float", true, c_type, z_index, tmp_Total_Top, 700, 400, tmp_Total_Left, 50);
 
     // console.log(window.innerWidth);
     // console.log(window.innerHeight);
@@ -226,8 +230,8 @@ export class Binary_Tree {
     // 부모 node 정보를 불러와서 left, right 로 분류하여 추가해준다.(기존 Left, 신규 Right)
     // const old_node = this.find_node(parent_id);
     const old_node = parent_node;
-    const left_node = new Node(new_id, "N", "C", "Dock", false, old_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
-    const right_node = new Node(new_id + 1, "N", "C", "Dock", false, change_node.chart_type, 0, 0, 0, 0, 50, old_node.id);
+    const left_node = new Node(new_id, "N", "C", "Dock", false, old_node.chart_type, 0, 0, 0, 0, 0, 50, old_node.id);
+    const right_node = new Node(new_id + 1, "N", "C", "Dock", false, change_node.chart_type, 0, 0, 0, 0, 0, 50, old_node.id);
 
     if (bLeft === true) {
       left_node.chart_type = change_node.chart_type;

@@ -8,8 +8,8 @@
 	import { PercentToLength, PercentToPx, Position_Check, Position_Fix } from "./ufunction";
 
   import { onMount } from 'svelte';
-  import { loop_guard } from 'svelte/internal';
-  import sub_Window from './Sub_window.svelte';
+  import { navigate } from 'svelte-routing';
+  // import sub_Window from './Sub_window.svelte';
 
   const bst = new Binary_Tree();
 	let idx = 0;
@@ -122,9 +122,9 @@
   e.preventDefault();
   }
 
-  // onMount(()=>{
-  //   console.log('aa')
-  // })
+  onMount(() => {
+    window.addEventListener('message', sub_window_message);
+  });
 
   // Grid Data Input
   WebReceiveGridData.subscribe((Item) => {
@@ -168,14 +168,14 @@ const Add_Div = (e) => {
 
     if (tmp_id == -1) {
       // root 인 경우는 Dock 
-      bst.root = new Node(idx, "N", "C", "Dock", false, select_chart, 0, 0, 0, 0, 100);
+      bst.root = new Node(idx, "N", "C", "Dock", false, select_chart, 0, 0, 0, 0, 0, 100);
       
       $Mosaic_Arr = [bst.root];
       console.log($Mosaic_Arr);
     } else {
       // 아닌 경우는 무조건 Float
       // Float Div 추가하기
-      const insert_result = bst.insert_Float($Float_Arr, select_chart);
+      const insert_result = bst.insert_Float($Float_Arr, select_chart, ++last_z_index);
 
       if (insert_result) {
         // idx = idx + 2;
@@ -257,7 +257,7 @@ const Add_Div = (e) => {
 
   const Change_Dock_To_Float = (item) => {
     // Dock Node의 정보를 Float 배열에 Add 하고 
-    const change_dock_result = bst.insert_Float($Float_Arr, item.chart_type);
+    const change_dock_result = bst.insert_Float($Float_Arr, item.chart_type, ++last_z_index);
 
     if (change_dock_result) {
       $Float_Arr.push(change_dock_result);
@@ -714,7 +714,7 @@ const onMouseDown_bar_event = (e) => {
       }        
 
       shadow_div.style.display = 'block';
-      shadow_div.style.zIndex  = "100";
+      shadow_div.style.zIndex  = String(last_z_index + 100);
     };
 
     // console.log(tmp_position);
@@ -825,7 +825,7 @@ const onMouseDown_bar_event = (e) => {
 
           function onDrag_DragStart_Float_Event(e) {
             // 자신을 감춘다.
-            tmp_float_div.style.zIndex = "21";
+            tmp_float_div.style.zIndex = String(last_z_index);
             tmp_float_div.style.opacity = "0";
 
             // Dock 할 영역이 없으면 진행할 수 없...... 없나? 이게 Root가 되는거 아니야?
@@ -842,7 +842,7 @@ const onMouseDown_bar_event = (e) => {
               let shadow_div = document.getElementById("shadow");
               shadow_div.style.inset = '0%';
               shadow_div.style.display = 'block';
-              shadow_div.style.zIndex  = "100";
+              shadow_div.style.zIndex  = String(last_z_index);
             };
 
             tmp_float_div.addEventListener('drag',        onDrag_Drag_Float_Event);
@@ -852,6 +852,8 @@ const onMouseDown_bar_event = (e) => {
             // 나의 width를 수정한다.
             tmp_float_div.style.width = "1px";
             tmp_float_div.style.height = "1px";
+
+            Float_Div_All_Hide(parseInt(tmp_target_Id.slice(1)));
 
             tmp_float_div.removeEventListener('dragstart', onDrag_DragStart_Float_Event);
             tmp_float_div.removeEventListener('drag',      onDrag_Drag_Float_Event);
@@ -998,7 +1000,7 @@ const onMouseDown_bar_event = (e) => {
           tmp_float_div[0].style.width   = drag_node.inset_right + "px";
           tmp_float_div[0].style.height  = drag_node.inset_bottom + "px";
           tmp_float_div[0].style.display = 'block';
-          tmp_float_div[0].style.zIndex  = "20";
+          tmp_float_div[0].style.zIndex  = String(last_z_index);
           tmp_float_div[0].style.opacity = "1";
         } else
         {
@@ -1068,6 +1070,8 @@ const onMouseDown_bar_event = (e) => {
         };
       };
 
+      Float_Div_All_Show();
+
       drag_node  = null;
       drag_state = "N";
       drag_bleft = false;
@@ -1083,7 +1087,7 @@ const onMouseDown_bar_event = (e) => {
 
     const tmp_float_div = e.target;
     let tmp_id = e.target.getAttribute('name');
-    console.log(tmp_id);
+    // console.log(tmp_id);
 
     if (tmp_id){
       let tmp_Item = $Float_Arr[parseInt(tmp_id.slice(1))];
@@ -1100,8 +1104,8 @@ const onMouseDown_bar_event = (e) => {
         tmp_Item.inset_right = tmp_float_div.clientWidth;
         tmp_Item.inset_bottom = tmp_float_div.clientHeight;
 
-        console.log(e.target);
-        console.log($Float_Arr);
+        // console.log(e.target);
+        // console.log($Float_Arr);
 
         tmp_float_div.removeEventListener('mouseup', onResize_End_Float_Event);    
       };
@@ -1109,7 +1113,7 @@ const onMouseDown_bar_event = (e) => {
   };
 
   const Inc_Zindex = (e) => {
-    last_z_index++;
+    ++last_z_index;
 
     let focus_element = Find_Focus_Background(e.target);
 
@@ -1118,115 +1122,71 @@ const onMouseDown_bar_event = (e) => {
     }
   };
 
+  function Float_Div_All_Hide(aID) {
+    let tmp_e = null;
 
-
-
-  const Change_Float_Drag = (e) => {
-		const tmp_float_div = e.target.parentElement.parentElement;
-    let tmp_id   = e.target.parentElement.parentElement.getAttribute('name');
-    let tmp_Item = $Float_Arr[parseInt(tmp_id.slice(1))];
-
-    console.log(e.target.parentElement.parentElement.parentElement);
-    console.log(tmp_Item);
+    $Float_Arr.forEach((tmp_float_node, index) => 
+    {
+      // aID를 제외한 나머지의 style의 z-index 값을 -1로 해서 뒤로 숨긴다.
+      if (aID != index)
+      {
+        tmp_e = document.getElementsByName("F" + String(index));
+        if (tmp_e) 
+        {
+          tmp_e[0].style.zIndex = "-1";
+        };
+      }
+    });
   };
+
+  function Float_Div_All_Show() {
+    let tmp_e = null;
+
+    $Float_Arr.forEach((tmp_float_node, index) => 
+    {
+      // 모든 style의 z-index 값을 -1로 해서 뒤로 숨긴다.
+      tmp_e = document.getElementsByName("F" + String(index));
+      if (tmp_e) 
+      {
+        tmp_e[0].style.zIndex = tmp_float_node.z_index;
+      };
+    });
+  };  
 
 	function open_Modal(node_item) {
 		// const windowItem = window.open('./', '_blank', 'width=800,height=300,resizable=yes')
 		// const windowItem = window.open('http://127.0.0.1:5173/', '_blank', 'width=800,height=300,resizable=yes')
 
-		const win = window.open('', 'Float Window', 'width=700,height=400');
-		const tmp_win = new sub_Window({
-			target: win.document.body,
-			props: { node_item, win }
-		});
+		// const win = window.open('', 'Float Window', 'width=700,height=400');
+		// const tmp_win = new sub_Window({
+		// 	target: win.document.body,
+		// 	props: { node_item, win }
+		// });
 
-    win.document.write(tmp_win.target);
-
-
-
-
-    // const new_Content = `
-    //   <html>
-    //     <head>
-    //       <title>New Window</title>
-    //       <style>
-    //         .div_Background {
-    //           margin: 3px;
-    //           border: 0;
-    //           border-color: Red;
-    //           background-color: white;
-    //           inset: 0%;
-    //           position: absolute;
-    //           z-index: 1;
-    //         }
-
-    //         .div_Title {
-    //           display: flex;
-    //           height: 40px;
-    //           border: 0;
-    //           justify-content: space-between;
-    //           background-color: gainsboro;
-    //           border-bottom: 3px;
-    //           border-bottom-color: #373737;
-    //           // cursor: move;
-    //         }
-
-    //         .button_Area {
-    //           display: flex;
-    //           justify-content: center;
-    //           user-select: none;
-    //         }
-
-    //         .div_Title_Area {
-    //           display: flex;
-    //           padding-left: 10px;
-    //           justify-content: center;
-    //           user-select: none;
-    //         }
-
-    //         .div_Body {
-    //           height: calc(100% - 40px);
-    //           border: 0;
-    //           width: 100%;
-    //           text-align: center;
-    //           vertical-align: middle;
-    //           background-color: whitesmoke;
-    //           user-select: none;
-    //           position: relative;
-    //         }
-
-    //         button {
-    //           margin-top: 5px;
-    //           margin-right: 6px;
-
-    //           width: 60px;
-    //           height: 30px;
-
-    //           user-select: none;
-    //           cursor: default;
-    //         }            
-    //       </style>
-    //     </head>
-    //     <body style="position: static">
-    //       <div class="div_Background">
-    //         <div class="div_Title">
-    //           <div class="div_Title_Area">
-    //           </div>
-    //           <div class="button_Area">
-    //             <button>F</button>
-    //             <button>X</button>
-    //           </div>
-    //         </div>
-    //         <div class="div_Body">
-    //           1111
-    //         </div>
-    //       </div>
-    //     </body>
-    //   </html>
-    // `;
-
-    // win.document.write(new_Content);
+    // win.document.write(tmp_win.target);
+    // navigate('/sub_Window', { target: '_blank' });
 	};
+
+  function sub_window_message(event) {
+    // sub window 에서 전달된 메세지
+    if (event.data === 'closed') {
+      console.log('B.svelte was closed');
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// if (bst.root == null) {
 	// 	// console.log("===========Root 생성===========");
@@ -1410,7 +1370,8 @@ const onMouseDown_bar_event = (e) => {
     <!-- {arr[5].arr_Data} -->
       <div
       class="div_Float_Background" name={"F"+item.id} on:mousedown={onResize_Start_Float_Event} on:dragend={onDrag_DragEnd_Float_Event}
-      style={"top: " + `${item.inset_top}px;` + " left: " + `${item.inset_left}px;` +  " width: " + `${item.inset_right}px;` + " height: " + `${item.inset_bottom}px;`}
+      style={"top: " + `${item.inset_top}px;` + " left: " + `${item.inset_left}px;` +  " width: " + `${item.inset_right}px;` + " height: " + `${item.inset_bottom}px;` +
+      "z-index: " + `${item.z_index};` }
       >
         <div class="div_Title" draggable="{true}" on:mousedown|stopPropagation={onDragStart_Float_Event}>
           <!-- <button on:click={Add_Div}>N</button>

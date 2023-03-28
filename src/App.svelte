@@ -6,6 +6,9 @@
   import WebsocketWorker from './websocketWorker.svelte';
 
   import Mosaic from './Mosaic.svelte';
+  import Sub_Window from './Sub_window.svelte';
+
+  import { Router, Route } from 'svelte-routing';
   
   // onMount(() => {
   //   // Data_Info 초기화
@@ -120,7 +123,10 @@
 
 <!-- HTML -->
 <div id="div_mosaic">
-  <Mosaic />
+  <Router>
+    <Route path="/" component={Mosaic} />
+    <Route path="/sub" component={Sub_Window} />
+  </Router>
 </div>	
 
 
