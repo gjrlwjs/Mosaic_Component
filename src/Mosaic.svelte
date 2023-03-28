@@ -9,7 +9,7 @@
 
   import { onMount } from 'svelte';
   import { loop_guard } from 'svelte/internal';
-  // import nice from 'd3-scale/src/nice.js';
+  import sub_Window from './Sub_window.svelte';
 
 	const bst = new Binary_Tree();
 	let idx = 0;
@@ -287,9 +287,12 @@ const onMouseDown_bar_event = (e) => {
     // 마우스 다운 이벤트 발생 => 마우스의 움직임에 따라, onMouseMove 이벤트를 유지한다(onMouseUp이 될 때까지 or onMouseLeave)
     // 마우스 움직임에 따른 이벤트 등록
     const bar = e.target;
-    bar.addEventListener('dragstart', onMouseDragstart_bar_event);
-    bar.addEventListener('drag',      onMouseDrag_bar_event);
-    bar.addEventListener('dragend',   onMouseDragend_bar_event);
+
+    // bar.addEventListener('dragstart', onMouseDragstart_bar_event);
+    // bar.addEventListener('drag',      onMouseDrag_bar_event);
+    // bar.addEventListener('dragend',   onMouseDragend_bar_event);
+    window.addEventListener('mousemove',      onMouseDrag_bar_event);
+    window.addEventListener('mouseup',        onMouseDragend_bar_event);
 
     // bar.addEventListener("touchmove", onMouseDrag_bar_event, TOUCH_EVENT_OPTIONS);
     // bar.addEventListener("touchend", onMouseDragend_bar_event, true);
@@ -311,10 +314,6 @@ const onMouseDown_bar_event = (e) => {
       // console.log(event.dataTransfer.dragEffect)
       // event.dataTransfer.effectAllowed = "move";
       // console.log(this);
-    }
-
-    function onMouseDragend_bar_event(event) {
-      // console.log("==============Bar Up=============");
 
       // 배율 변경
       if (event.x > 0 || event.y > 0) {
@@ -361,11 +360,64 @@ const onMouseDown_bar_event = (e) => {
         
         // console.log("=============client 좌표");
         // console.log(event.clientX + " / " + event.clientY);
-      };
+      };      
+    }
 
-      bar.removeEventListener('dragstart', onMouseDragstart_bar_event);
-      bar.removeEventListener('drag',      onMouseDrag_bar_event);
-      bar.removeEventListener('dragend',   onMouseDragend_bar_event);
+    function onMouseDragend_bar_event(event) {
+      // console.log("==============Bar Up=============");
+
+      // // 배율 변경
+      // if (event.x > 0 || event.y > 0) {
+      //   // 부모노드와 자식노드에 대한 내용을 변수에 받아온다.
+      //   let tmp_p = $Mosaic_Arr[parseInt(e.target.getAttribute('name'))];
+      //   let tmp_l = tmp_p.left;
+      //   let tmp_r = tmp_p.right;
+
+      //   let tmp_title  = document.getElementById("div_mosaic_menubar").offsetHeight;
+      //   let tmp_width  = e.target.parentElement.offsetWidth;
+      //   let tmp_height = e.target.parentElement.offsetHeight;
+
+      //   // 현재 마우스의 좌표를 기준으로, 몇퍼센트인지 역계산을 해줘야한다.
+      //   // 대상의 부모의 Width와 Left 좌표값을 가지고 계산하면 된다.
+      //   // ((마우스의 현재 좌표 - 기준좌표)  / 부모의 길이) * 100
+      //   // 부모의 div type이 C | R 에 따라 다르다.
+      //   if (tmp_p.div_type === "C") {
+      //     // tmp_l.ratio = ((event.clientX - (tmp_p.inset_left * (window.innerWidth  / 100))) / (window.innerWidth))  * 100;
+      //     tmp_l.ratio = (((event.clientX            ) - (tmp_p.inset_left *  (tmp_width   / 100))) / (PercentToLength(tmp_width,  tmp_p.inset_left, tmp_p.inset_right ))) * 100;
+      //   } else {
+      //     // tmp_l.ratio = ((event.clientY - (tmp_p.inset_top  * (window.innerHeight / 100))) / (window.innerHeight)) * 100;
+      //     // tmp_l.ratio = (((event.clientY - tmp_title) - (tmp_p.inset_top  * ((tmp_height - tmp_title)  / 100))) / (PercentToLength((tmp_height - tmp_title), tmp_p.inset_top,  tmp_p.inset_bottom))) * 100;
+      //     tmp_l.ratio = (((event.clientY - tmp_title) - (tmp_p.inset_top  *  (tmp_height  / 100))) / (PercentToLength(tmp_height, tmp_p.inset_top,  tmp_p.inset_bottom))) * 100;
+      //   } 
+      //   if (tmp_l.ratio < 15) {
+      //     tmp_l.ratio = 15;
+      //   } else if (tmp_l.ratio > 85) {
+      //     tmp_l.ratio = 85;
+      //   }
+      //   tmp_r.ratio = 100 - tmp_l.ratio;
+
+      //   // if(prevState!==currentState){
+
+      //   // }
+      //   // inset 재조정
+      //   bst.resize_div($Mosaic_Arr);
+
+      //   // 배열 갱신
+      //   // setArr([...arr]);        
+			// 	// arr = [...arr];
+      //   // Mosaic_Arr.set([...arr]);
+      //   // Mosaic_Arr.update(a => [...a]);
+      //   $Mosaic_Arr = $Mosaic_Arr;
+        
+      //   // console.log("=============client 좌표");
+      //   // console.log(event.clientX + " / " + event.clientY);
+      // };
+
+      // bar.removeEventListener('dragstart', onMouseDragstart_bar_event);
+      // bar.removeEventListener('drag',      onMouseDrag_bar_event);
+      // bar.removeEventListener('dragend',   onMouseDragend_bar_event);
+      window.removeEventListener('mousemove',      onMouseDrag_bar_event);          
+      window.removeEventListener('mouseup',        onMouseDragend_bar_event);       
 
       // bar.removeEventListener("touchmove", onMouseDrag_bar_event,TOUCH_EVENT_OPTIONS);
       // bar.removeEventListener("touchend", onMouseDragend_bar_event, true);
@@ -721,6 +773,7 @@ const onMouseDown_bar_event = (e) => {
 // ==================================================================================================================================================  
 	const onDragStart_Float_Event = (e) => {
     console.log("Float Drag 시작===============");
+
 		// const tmp_float_div = document.getElementById("123");
     const tmp_float_div = e.target.parentElement;
     const tmp_target_Id = e.target.parentElement.getAttribute('name');
@@ -741,35 +794,40 @@ const onMouseDown_bar_event = (e) => {
           drop_id    = tmp_Item.id;
           drag_type  = "Float";
 
-          // 자신을 감춘다.
-          tmp_float_div.style.zIndex = "21";
-          tmp_float_div.style.opacity = "0";
+          tmp_float_div.addEventListener('dragstart',   onDrag_DragStart_Float_Event);
 
-          // Dock 할 영역이 없으면 진행할 수 없...... 없나? 이게 Root가 되는거 아니야?
-          if ($Mosaic_Arr.length > 0) 
-          {
-            // Dock에다가 Float Div를 삽입한다.
-            console.log("==============Float -> Dock로 영역 선택=============");
-            // console.log(tmp_Item);
-            // console.log(tmp_Item.id);
+          function onDrag_DragStart_Float_Event(e) {
+            // 자신을 감춘다.
+            tmp_float_div.style.zIndex = "21";
+            tmp_float_div.style.opacity = "0";
 
-          } else {
-            console.log("==============Float -> Root로 영역 선택=============");
+            // Dock 할 영역이 없으면 진행할 수 없...... 없나? 이게 Root가 되는거 아니야?
+            if ($Mosaic_Arr.length > 0) 
+            {
+              // Dock에다가 Float Div를 삽입한다.
+              console.log("==============Float -> Dock로 영역 선택=============");
+              // console.log(tmp_Item);
+              // console.log(tmp_Item.id);
 
-            let shadow_div = document.getElementById("shadow");
-            shadow_div.style.inset = '0%';
-            shadow_div.style.display = 'block';
-            shadow_div.style.zIndex  = "100";
+            } else {
+              console.log("==============Float -> Root로 영역 선택=============");
+
+              let shadow_div = document.getElementById("shadow");
+              shadow_div.style.inset = '0%';
+              shadow_div.style.display = 'block';
+              shadow_div.style.zIndex  = "100";
+            };
+
+            tmp_float_div.addEventListener('drag',        onDrag_Drag_Float_Event);
           };
-
-          tmp_float_div.addEventListener('drag',      onDrag_Drag_Float_Event);
 
           function onDrag_Drag_Float_Event(e) {
             // 나의 width를 수정한다.
             tmp_float_div.style.width = "1px";
             tmp_float_div.style.height = "1px";
 
-            tmp_float_div.removeEventListener('drag',   onDrag_Drag_Float_Event);
+            tmp_float_div.removeEventListener('dragstart', onDrag_DragStart_Float_Event);
+            tmp_float_div.removeEventListener('drag',      onDrag_Drag_Float_Event);
           };
         }
         else 
@@ -777,6 +835,7 @@ const onMouseDown_bar_event = (e) => {
           // Float 형태로 그냥 떠다니거나
           console.log("==============Float Move Start=============");
           console.log("Item = " + tmp_float_div);
+          e.preventDefault();
 
           let move_offset_x = 0;
           let move_offset_y = 0;
@@ -790,9 +849,9 @@ const onMouseDown_bar_event = (e) => {
 
           // console.log('offset X= ' + tmp_offset.x);
           // console.log('offset y= ' + tmp_offset.y);		
-            
-          tmp_float_div.addEventListener('drag',      onMove_Drag_Float_Event);
-          tmp_float_div.addEventListener('dragend',   onMove_DragEnd_Float_Event);		
+
+          tmp_float_div.addEventListener('mousemove',      onMove_Drag_Float_Event);          
+          tmp_float_div.addEventListener('mouseup',        onMove_DragEnd_Float_Event);          
           
           function onMove_Drag_Float_Event(e) {
             // console.log("==============Float Moving =============");
@@ -874,8 +933,8 @@ const onMouseDown_bar_event = (e) => {
             // tmp_float_div.style.top  = event.clientY;
             // tmp_float_div.style.left = event.clientX;
 
-            tmp_float_div.removeEventListener('drag',      onMove_Drag_Float_Event);
-            tmp_float_div.removeEventListener('dragend',   onMove_DragEnd_Float_Event);
+            tmp_float_div.removeEventListener('mousemove', onMove_Drag_Float_Event);
+            tmp_float_div.removeEventListener('mouseup',   onMove_DragEnd_Float_Event);
           };
         };
       };
@@ -1037,6 +1096,103 @@ const onMouseDown_bar_event = (e) => {
     console.log(tmp_Item);
   };
 
+	function open_Modal(node_item) {
+		// const windowItem = window.open('./', '_blank', 'width=800,height=300,resizable=yes')
+		// const windowItem = window.open('http://127.0.0.1:5173/', '_blank', 'width=800,height=300,resizable=yes')
+
+		const win = window.open('', 'Float Window', 'width=700,height=400');
+		const tmp_win = new sub_Window({
+			target: win.document.body,
+			props: { node_item, win }
+		});
+
+    win.document.write(tmp_win.target);
+
+
+
+
+    // const new_Content = `
+    //   <html>
+    //     <head>
+    //       <title>New Window</title>
+    //       <style>
+    //         .div_Background {
+    //           margin: 3px;
+    //           border: 0;
+    //           border-color: Red;
+    //           background-color: white;
+    //           inset: 0%;
+    //           position: absolute;
+    //           z-index: 1;
+    //         }
+
+    //         .div_Title {
+    //           display: flex;
+    //           height: 40px;
+    //           border: 0;
+    //           justify-content: space-between;
+    //           background-color: gainsboro;
+    //           border-bottom: 3px;
+    //           border-bottom-color: #373737;
+    //           // cursor: move;
+    //         }
+
+    //         .button_Area {
+    //           display: flex;
+    //           justify-content: center;
+    //           user-select: none;
+    //         }
+
+    //         .div_Title_Area {
+    //           display: flex;
+    //           padding-left: 10px;
+    //           justify-content: center;
+    //           user-select: none;
+    //         }
+
+    //         .div_Body {
+    //           height: calc(100% - 40px);
+    //           border: 0;
+    //           width: 100%;
+    //           text-align: center;
+    //           vertical-align: middle;
+    //           background-color: whitesmoke;
+    //           user-select: none;
+    //           position: relative;
+    //         }
+
+    //         button {
+    //           margin-top: 5px;
+    //           margin-right: 6px;
+
+    //           width: 60px;
+    //           height: 30px;
+
+    //           user-select: none;
+    //           cursor: default;
+    //         }            
+    //       </style>
+    //     </head>
+    //     <body style="position: static">
+    //       <div class="div_Background">
+    //         <div class="div_Title">
+    //           <div class="div_Title_Area">
+    //           </div>
+    //           <div class="button_Area">
+    //             <button>F</button>
+    //             <button>X</button>
+    //           </div>
+    //         </div>
+    //         <div class="div_Body">
+    //           1111
+    //         </div>
+    //       </div>
+    //     </body>
+    //   </html>
+    // `;
+
+    // win.document.write(new_Content);
+	};
 
 	// if (bst.root == null) {
 	// 	// console.log("===========Root 생성===========");
@@ -1089,7 +1245,7 @@ const onMouseDown_bar_event = (e) => {
 
 <div id="div_mosaic_main">
   <div id="div_mosaic_body">
-    <div id="shadow" class="div_Shadow" draggable="true" on:dragover={onDrag_Over_shadow_event}></div>
+    <div id="shadow" class="div_Shadow" draggable="{true}" on:dragover={onDrag_Over_shadow_event}></div>
 
     <!-- Dock -->
     <!-- <div id="div_mosaic_body">Mosaic Area</div> -->
@@ -1158,7 +1314,7 @@ const onMouseDown_bar_event = (e) => {
           class="div_Background" name={item.right.id} on:dragover={onDragOver_div_event} on:dragend={onDragEnd_div_event} on:dragenter={onDragenter_div_event}
           style={"inset: " + `${item.right.inset_top}% ${item.right.inset_right}% ${item.right.inset_bottom}% ${item.right.inset_left}%`}
           >
-            <div class="div_Title" draggable="true" on:dragstart={onDragStart_div_event}>
+            <div class="div_Title" draggable="{true}" on:dragstart={onDragStart_div_event}>
               <div class="div_Title_Area">
               </div>
     
@@ -1189,7 +1345,7 @@ const onMouseDown_bar_event = (e) => {
           class="div_Background" name={item.id} on:dragover={onDragOver_div_event} on:dragend={onDragEnd_div_event} on:dragenter={onDragenter_div_event}
           style={"inset: " + `${item.inset_top}% ${item.inset_right}% ${item.inset_bottom}% ${item.inset_left}%`}
         >
-          <div class="div_Title"  draggable="true" style={"cursor: " + 'default'}>
+          <div class="div_Title"  draggable="{true}" style={"cursor: " + 'default'}>
             <div class="div_Title_Area">
             </div>
   
@@ -1222,7 +1378,7 @@ const onMouseDown_bar_event = (e) => {
       class="div_Float_Background" name={"F"+item.id} on:mousedown={onResize_Start_Float_Event} on:dragend={onDrag_DragEnd_Float_Event}
       style={"top: " + `${item.inset_top}px;` + " left: " + `${item.inset_left}px;` +  " width: " + `${item.inset_right}px;` + " height: " + `${item.inset_bottom}px;`}
       >
-        <div class="div_Title" draggable="true" on:mousedown|stopPropagation={()=>{}} on:dragstart={onDragStart_Float_Event} >
+        <div class="div_Title" draggable="{true}" on:mousedown|stopPropagation={onDragStart_Float_Event}>
           <!-- <button on:click={Add_Div}>N</button>
           <button on:click={Add_Div}>D</button> -->
           <div class="div_Title_Area">
@@ -1231,7 +1387,7 @@ const onMouseDown_bar_event = (e) => {
           </div>
 
           <div class="button_Area">
-            <button on:mousedown|stopPropagation={()=>{}}>N</button>
+            <button on:mousedown|stopPropagation={()=>{}} on:click={()=>open_Modal(item)}>N</button>
             <button on:mousedown|stopPropagation={()=>{}} on:click={()=>{Del_Div_Float(item)}}>X</button>
           </div>
         </div>

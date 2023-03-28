@@ -7,7 +7,7 @@ export class Node {
     div_type = "N", // DIV 표시 방식(None / Col / Row)
     node_type = "C", // 노드 타입(Disable / Parent / Child )
     window_type = "Float", // Form Type(Dock / Float)
-    float_type = false, // Float Type(false / true)
+    float_type = true, // Float Type(false / true)
     chart_type = 0, // Chart Type 0 ~ 9
 
     inset_top = 0,
@@ -177,7 +177,7 @@ export class Binary_Tree {
     console.log("===========insert Float Node 1회============");
 
     // 독립적인 노드를 생성해서 반환한다.
-    const new_node = new Node(new_id, "N", "C", "Float", false, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
+    const new_node = new Node(new_id, "N", "C", "Float", true, c_type, window.innerHeight * 0.5 - 400 / 2, 700, 400, window.innerWidth * 0.5 - 700 / 2, 50);
 
     // console.log(window.innerWidth);
     // console.log(window.innerHeight);
