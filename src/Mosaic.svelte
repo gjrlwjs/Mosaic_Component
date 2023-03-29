@@ -880,6 +880,7 @@ const onMouseDown_bar_event = (e) => {
           // console.log('offset y= ' + tmp_offset.y);		
 
           tmp_float_div.addEventListener('mousemove',      onMove_Drag_Float_Event);          
+          tmp_float_div.addEventListener('mouseleave',     onMove_Drag_Float_Event);
           tmp_float_div.addEventListener('mouseup',        onMove_DragEnd_Float_Event);          
           
           function onMove_Drag_Float_Event(e) {
@@ -962,8 +963,12 @@ const onMouseDown_bar_event = (e) => {
             // tmp_float_div.style.top  = event.clientY;
             // tmp_float_div.style.left = event.clientX;
 
-            tmp_float_div.removeEventListener('mousemove', onMove_Drag_Float_Event);
-            tmp_float_div.removeEventListener('mouseup',   onMove_DragEnd_Float_Event);
+            // tmp_Item.inset_left = tmp_float_div.offsetLeft;    
+            // tmp_Item.inset_top  = tmp_float_div.offsetTop;
+
+            tmp_float_div.removeEventListener('mousemove',  onMove_Drag_Float_Event);
+            tmp_float_div.removeEventListener('mouseleave', onMove_Drag_Float_Event);            
+            tmp_float_div.removeEventListener('mouseup',    onMove_DragEnd_Float_Event);
           };
         };
       };
