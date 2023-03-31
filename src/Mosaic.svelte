@@ -290,6 +290,7 @@ const Add_Div = (e) => {
     const change_dock_result = bst.insert_Float($Float_Arr, item.chart_type, ++last_z_index);
 
     if (change_dock_result) {
+      change_dock_result.float_type = false;
       $Float_Arr.push(change_dock_result);
 
       // Dock 배열에서 본인을 지운다.
