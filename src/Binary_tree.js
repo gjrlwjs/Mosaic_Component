@@ -72,6 +72,105 @@ export class Binary_Tree {
     this.root = null;
   }
 
+  create_Root_Child_Node(parent_node, new_id, c_type, new_div_type, bLeft) {
+    console.log("===========Root Child Node 생성 1회============");
+
+    // 부모 node 정보를 불러와서 left, right 로 분류하여 추가해준다.(기존 Left, 신규 Right)
+    // const old_node = this.find_node(parent_id);
+    const old_node = parent_node;
+    const P_node = new Node(
+      new_id,
+      new_div_type,
+      "P",
+      old_node.window_type,
+      old_node.float_type,
+      old_node.chart_type,
+      0,
+      old_node.inset_top,
+      old_node.inset_right,
+      old_node.inset_bottom,
+      old_node.inset_left,
+      100
+      // old_node.id
+    );
+    // const right_node = new Node(new_id + 1, "N", "C", "windows " + (text_idx + 1), old_node.inset_top, old_node.inset_right, old_node.inset_bottom, old_node.inset_left, 50, old_node.id);
+
+    const c_node = new Node(
+      new_id + 1,
+      "N",
+      "C",
+      "Dock",
+      old_node.float_type,
+      c_type,
+      0,
+      old_node.inset_top,
+      old_node.inset_right,
+      old_node.inset_bottom,
+      old_node.inset_left,
+      50
+      // old_node.id
+    );
+
+    // console.log("부모 ID = " + old_node.id);
+    // console.log(old_node);
+    old_node.ratio = 50;
+
+    // target 노드를 찾아왔으니, Left Right 값을 입력한다.
+    if (old_node) {
+      // 부모 ID 셋팅
+      c_node.p_id = P_node.id;
+      old_node.p_id = P_node.id;
+
+      // Left / Right 자리 배정
+      if (bLeft) {
+        P_node.left = c_node;
+        P_node.right = old_node;
+      } else {
+        P_node.left = old_node;
+        P_node.right = c_node;
+      }
+
+      // 화면 너비, 높이
+      let calc_width = 0;
+      let calc_height = 0;
+
+      // 화면 너비, 높이
+      calc_width = (100 - (P_node.inset_left + P_node.inset_right)) / 2;
+      calc_height = (100 - (P_node.inset_top + P_node.inset_bottom)) / 2;
+
+      // new_div_type 에 따라,
+      if (new_div_type == "C") {
+        if (bLeft) {
+          // inset 값 셋팅
+          c_node.inset_right = P_node.inset_right + calc_width;
+          old_node.inset_left = P_node.inset_left + calc_width;
+        } else {
+          // inset 값 셋팅
+          old_node.inset_right = P_node.inset_right + calc_width;
+          c_node.inset_left = P_node.inset_left + calc_width;
+        }
+      } else if (new_div_type == "R") {
+        if (bLeft) {
+          // inset 값 셋팅
+          c_node.inset_bottom = P_node.inset_bottom + calc_height;
+          old_node.inset_top = P_node.inset_top + calc_height;
+        } else {
+          // inset 값 셋팅
+          old_node.inset_bottom = P_node.inset_bottom + calc_height;
+          c_node.inset_top = P_node.inset_top + calc_height;
+        }
+      }
+
+      // old_node.left = P_node;
+      // old_node.right = c_node;
+      // console.log("old_node ===========");
+      // console.log(old_node);
+      return [P_node, c_node]; //[left_node, left_node, right_node];
+    }
+    return null; //left_node;//old_node.left;
+    // return left_node;//old_node.left;
+  }
+
   // 추가 버튼을 통해 노드 추가 요청이 온다. 이때, 자신의 node_ID(key)를 들고 오기 때문에 Parent ID 또한 알 수 있다.
   // 그렇다면 Left는 언제 생기냐? 추가 버튼이 눌려서 이벤트가 생성될 때, 해당 Div에 있는 key를 알 수 있으니, 그걸로 Left로 지정한다.
   // Right가 생길 때, Left가 null 일 수는 없다. 이때는 노드 자체를 삭제하고 상위 부모 자리에 Right 노드 정보를 넣어주어야한다.
@@ -356,6 +455,49 @@ export class Binary_Tree {
     tmp_dst.inset_right = tmp_source.inset_right;
     tmp_dst.inset_bottom = tmp_source.inset_bottom;
     tmp_dst.inset_left = tmp_source.inset_left;
+  }
+
+  copy_Info(tmp_source, tmp_dst) {
+    tmp_dst.div_type = tmp_source.div_type;
+    tmp_dst.node_type = tmp_source.node_type;
+    tmp_dst.window_type = tmp_source.window_type;
+    tmp_dst.float_type = tmp_source.float_type;
+    tmp_dst.chart_type = tmp_source.chart_type;
+    tmp_dst.z_index = tmp_source.z_index;
+
+    tmp_dst.ratio = tmp_source.ratio;
+
+    tmp_dst.p_id = tmp_source.p_id;
+    tmp_dst.left = tmp_source.left;
+    tmp_dst.right = tmp_source.right;
+  }
+
+  resize_Root_Child(tmp_node) {
+    // 인자가 부모 노드이면(= 노드타입이 P인 경우, 하위 노드의 inset 값을 재조정함. 하위 노드가 P인 경우도 마찬가지)
+    if (tmp_node.node_type === "P") {
+      let tmp_left = tmp_node.left;
+      let tmp_right = tmp_node.right;
+
+      // window_type이 [Float]면 하면 안된다.
+      // inset OverWrite
+      this.copy_inset(tmp_node, tmp_left);
+      this.copy_inset(tmp_node, tmp_right);
+
+      // 부모의 분할 타입에 따라, 부모 대비 자식의 비율을 inset 값에 재조정해준다.
+      if (tmp_node.div_type === "C") {
+        // C = Col = 가로 = left / right
+        let tmp_width = 100 - (tmp_node.inset_left + tmp_node.inset_right);
+
+        tmp_left.inset_right = tmp_left.inset_right + tmp_width * ((100 - tmp_left.ratio) / 100);
+        tmp_right.inset_left = tmp_right.inset_left + tmp_width * ((100 - tmp_right.ratio) / 100); //tmp_right.ratio / 100));
+      } else {
+        // R = Row = 세로 = top / bottom
+        let tmp_height = 100 - (tmp_node.inset_top + tmp_node.inset_bottom);
+
+        tmp_left.inset_bottom = tmp_left.inset_bottom + tmp_height * ((100 - tmp_left.ratio) / 100);
+        tmp_right.inset_top = tmp_right.inset_top + tmp_height * ((100 - tmp_right.ratio) / 100); //tmp_right.ratio / 100));
+      }
+    }
   }
 
   resize_div(tmp_arr) {
