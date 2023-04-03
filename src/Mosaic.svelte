@@ -621,7 +621,8 @@ const onMouseDown_bar_event = (e) => {
       } else {
         if (e.target.getAttribute("name") === "root") {
           // console.log("현재 타깃 ID = " + e.target.id);
-          drop_id = parseInt(e.target.id);
+          // drop_id = parseInt(e.target.id);
+          drop_id = -1;
         };
       };
     } else {
@@ -644,7 +645,8 @@ const onMouseDown_bar_event = (e) => {
       } else {
         if (e.target.getAttribute("name") === "root") {
           // console.log("현재 타깃 ID = " + e.target.id);
-          drop_id = parseInt(e.target.id);
+          // drop_id = parseInt(e.target.id);
+          drop_id = -1;
         };
       };
     };
@@ -771,11 +773,9 @@ const onMouseDown_bar_event = (e) => {
     // console.log("Node id = " + e.target.parentElement.getAttribute("name") + " / X 좌표 = " + e.clientX + " / 좌표 Y = " + e.clientY);
     // console.log(e.target.parentElement);
     // console.log(e.target.parentElement.getAttribute("name"));
-    console.log($Mosaic_Arr);
-    console.log(drag_node);
-    console.log(drop_id);
 
-    if ($Mosaic_Arr[drop_id].p_id != null) {
+    // if ($Mosaic_Arr[drop_id].p_id != null) {
+    if (drop_id != -1) {
       // 일반적인 Move (Dock Type)
       if (drag_node.id !== drop_id) {
         // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
@@ -821,6 +821,9 @@ const onMouseDown_bar_event = (e) => {
       };
     } else {
       // 최상위 Move
+      let tmp_Root = document.getElementsByName("root");
+      drop_id = parseInt(tmp_Root[0].id);
+
       // drag_node의 부모를 Deep Copy 해둠.
       // Root를 기반으로 둔 Node 정보(drag / bro)를 새로 생성하고 기존 값을 넣어준다.
       let tmp_div_type = "N";
@@ -840,9 +843,6 @@ const onMouseDown_bar_event = (e) => {
         $Mosaic_Arr.push(create_root_result[0]);
         $Mosaic_Arr.push(create_root_result[1]);
 
-        // 기존 Root에 붙어있던 노드들만큼은 Inset 값을 재조정 해줘야한다.
-        bst.resize_Root_Child($Mosaic_Arr[drop_id]);
-
         // let tmp_drag_node = JSON.parse(JSON.stringify(drag_node));
         // drag_node의 본인과 부모 정보를 임시 변수에 Copy하고 drag_node를 지운다.
         if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
@@ -851,8 +851,16 @@ const onMouseDown_bar_event = (e) => {
           bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
         };
 
+        // 하위 노드들의 Inset 값을 재조정 해줘야한다.
+        // bst.Init_P_Inset($Mosaic_Arr[drop_id]);
+
+        console.log("================Init P Inset=============11111111111");
+
+        // 하위 노드들의 Inset 값을 재조정 해줘야한다.
+        bst.Init_P_Inset($Mosaic_Arr[create_root_result[0].id]);
+
         // 전체 inset 재조정
-        bst.resize_div($Mosaic_Arr);
+        // bst.resize_div($Mosaic_Arr);
         
         $Mosaic_Arr = $Mosaic_Arr;
       };
@@ -1073,7 +1081,12 @@ const onMouseDown_bar_event = (e) => {
         // Float 배열 갱신
         Del_Div_Float(drag_node);      
       } else {
-        if ($Mosaic_Arr[drop_id].p_id != null) {
+        // Main Background 냐 아니냐
+        console.log(e.target.parentElement);
+        console.log(drop_id);
+        if (drop_id != -1) {
+        // if ($Mosaic_Arr[drop_id].p_id != null) {
+        // if (e.target.parentElement.getAttribute("name") != "root") {
           if (drag_state == 'N') {
             // 아무 선택 안됬으면 다시 보여줘?
             // 엘리먼트 찾기
@@ -1085,58 +1098,27 @@ const onMouseDown_bar_event = (e) => {
             tmp_float_div[0].style.opacity = "1";
           } else
           {
-              // Dock Type에 하나를 추가해주고 
-              const insert_result = bst.insert_Dock($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node.chart_type);
-              if (insert_result) {
-                idx = idx + 2;
+            // Dock Type에 하나를 추가해주고 
+            const insert_result = bst.insert_Dock($Mosaic_Arr[drop_id], $Mosaic_Arr.length, drag_node.chart_type);
+            if (insert_result) {
+              idx = idx + 2;
 
-                $Mosaic_Arr.push(insert_result[0]);
-                $Mosaic_Arr.push(insert_result[1]);
+              $Mosaic_Arr.push(insert_result[0]);
+              $Mosaic_Arr.push(insert_result[1]);
 
-                // 부모의 inset 값 Copy 해서 자식들한테 넣어주고
-                // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[0]);
-                // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[1]);      
+              // 부모의 inset 값 Copy 해서 자식들한테 넣어주고
+              // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[0]);
+              // bst.copy_inset($Mosaic_Arr[insert_result[0].p_id], insert_result[1]);      
 
-                // 재자리 넣어주고 
-                // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
-                // console.log("insert_result[0].id = " + insert_result[0].id);
-                // console.log("insert_result[1].id = " + insert_result[1].id);
+              // 재자리 넣어주고 
+              // 위치에 따라, Col | Row   /   Left | Right 를 지정하여 Insert / remove 해줘야한다.
+              // console.log("insert_result[0].id = " + insert_result[0].id);
+              // console.log("insert_result[1].id = " + insert_result[1].id);
 
-                const change_result = bst.change($Mosaic_Arr[insert_result[0].id], $Mosaic_Arr.length, insert_result[1], drag_state, drag_bleft);
-                if (change_result) {
-                  $Mosaic_Arr.push(change_result[0]);
-                  $Mosaic_Arr.push(change_result[1]);
-                };
-
-                // 기존 배열에서 inset 값을 변경 후 가져와야한다.
-                // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
-                //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-                // } else {
-                //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-                // }       
-                // console.log("change_result[0].id = " + change_result[0].id);
-                // console.log("change_result[1].id = " + change_result[1].id);
-
-                if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id]) {
-                  bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
-                } else {
-                  bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
-                };
-
-                // inset 재조정
-                bst.resize_div($Mosaic_Arr);
-
-                // Float Arr 에서 나를 지운다.
-                // Float 배열 갱신
-                Del_Div_Float(drag_node);
-
-                // Dock 배열 갱신
-                // setArr([...arr]);
-                $Mosaic_Arr = $Mosaic_Arr;
-
-                // console.log("==============Drop after Log=============");
-                // console.log($Mosaic_Arr);
-                // console.log($Float_Arr);
+              const change_result = bst.change($Mosaic_Arr[insert_result[0].id], $Mosaic_Arr.length, insert_result[1], drag_state, drag_bleft);
+              if (change_result) {
+                $Mosaic_Arr.push(change_result[0]);
+                $Mosaic_Arr.push(change_result[1]);
               };
 
               // 기존 배열에서 inset 값을 변경 후 가져와야한다.
@@ -1144,14 +1126,48 @@ const onMouseDown_bar_event = (e) => {
               //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
               // } else {
               //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
-              // } 
-              // // drag_node = null;
-              // // inset 재조정
-              // bst.resize_div($Mosaic_Arr);
+              // }       
+              // console.log("change_result[0].id = " + change_result[0].id);
+              // console.log("change_result[1].id = " + change_result[1].id);
+
+              if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id]) {
+                bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+              } else {
+                bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[insert_result[1].id].p_id], $Mosaic_Arr[insert_result[1].id]);
+              };
+
+              // inset 재조정
+              bst.resize_div($Mosaic_Arr);
+
+              // Float Arr 에서 나를 지운다.
+              // Float 배열 갱신
+              Del_Div_Float(drag_node);
+
+              // Dock 배열 갱신
+              // setArr([...arr]);
+              $Mosaic_Arr = $Mosaic_Arr;
+
+              // console.log("==============Drop after Log=============");
+              // console.log($Mosaic_Arr);
+              // console.log($Float_Arr);
+            };
+
+            // 기존 배열에서 inset 값을 변경 후 가져와야한다.
+            // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
+            //   bst.remove($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id], $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+            // } else {
+            //   bst.remove(null, $Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id], $Mosaic_Arr[drag_node.id]);
+            // } 
+            // // drag_node = null;
+            // // inset 재조정
+            // bst.resize_div($Mosaic_Arr);
           };
         } else {
           // console.log("Main Back Drop");
           // 최상위 Move
+          let tmp_Root = document.getElementsByName("root");
+          drop_id = parseInt(tmp_Root[0].id);          
+
           // drag_node의 부모를 Deep Copy 해둠.
           // Root를 기반으로 둔 Node 정보(drag / bro)를 새로 생성하고 기존 값을 넣어준다.
           let tmp_div_type = "N";
@@ -1171,9 +1187,6 @@ const onMouseDown_bar_event = (e) => {
             $Mosaic_Arr.push(create_root_result[0]);
             $Mosaic_Arr.push(create_root_result[1]);
 
-            // 기존 Root에 붙어있던 노드들만큼은 Inset 값을 재조정 해줘야한다.
-            bst.resize_Root_Child($Mosaic_Arr[drop_id]);
-
             // let tmp_drag_node = JSON.parse(JSON.stringify(drag_node));
             // drag_node의 본인과 부모 정보를 임시 변수에 Copy하고 drag_node를 지운다.
             // if ($Mosaic_Arr[$Mosaic_Arr[$Mosaic_Arr[drag_node.id].p_id].p_id]) {
@@ -1186,8 +1199,12 @@ const onMouseDown_bar_event = (e) => {
             // Float 배열 갱신
             Del_Div_Float(drag_node);            
 
+            console.log("================Init P Inset=============222222222222");
             // 전체 inset 재조정
-            bst.resize_div($Mosaic_Arr);
+            // bst.resize_div($Mosaic_Arr);
+            // 기존 Root에 붙어있던 노드들만큼은 Inset 값을 재조정 해줘야한다.
+            bst.Init_P_Inset($Mosaic_Arr[create_root_result[0].id]);
+            // bst.resize_Child($Mosaic_Arr[drop_id]);
             
             $Mosaic_Arr = $Mosaic_Arr;
           };

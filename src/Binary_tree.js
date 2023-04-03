@@ -111,10 +111,6 @@ export class Binary_Tree {
       // old_node.id
     );
 
-    // console.log("부모 ID = " + old_node.id);
-    // console.log(old_node);
-    old_node.ratio = 50;
-
     // target 노드를 찾아왔으니, Left Right 값을 입력한다.
     if (old_node) {
       // 부모 ID 셋팅
@@ -125,10 +121,20 @@ export class Binary_Tree {
       if (bLeft) {
         P_node.left = c_node;
         P_node.right = old_node;
+
+        c_node.ratio = 30;
+        old_node.ratio = 70;
       } else {
         P_node.left = old_node;
         P_node.right = c_node;
+
+        old_node.ratio = 70;
+        c_node.ratio = 30;
       }
+
+      console.log(P_node);
+      console.log(c_node);
+      console.log(old_node);
 
       // 화면 너비, 높이
       let calc_width = 0;
@@ -472,7 +478,18 @@ export class Binary_Tree {
     tmp_dst.right = tmp_source.right;
   }
 
-  resize_Root_Child(tmp_node) {
+  Init_P_Inset(aNode) {
+    // Node Inset 값 재설정
+    this.resize_Child(aNode);
+
+    // 재귀적 Node 콜
+    if (aNode.node_type === "P") {
+      this.Init_P_Inset(aNode.left);
+      this.Init_P_Inset(aNode.right);
+    }
+  }
+
+  resize_Child(tmp_node) {
     // 인자가 부모 노드이면(= 노드타입이 P인 경우, 하위 노드의 inset 값을 재조정함. 하위 노드가 P인 경우도 마찬가지)
     if (tmp_node.node_type === "P") {
       let tmp_left = tmp_node.left;
