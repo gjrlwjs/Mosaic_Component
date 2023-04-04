@@ -186,7 +186,7 @@
 // ==================================================================================================================================================
 // =================================================================== Button Event =================================================================
 // ==================================================================================================================================================
-const Add_Div = (e) => {
+  const Add_Div = (e) => {
     // TODO inset 계산
     // console.log('===========DIV 추가===========');
 
@@ -237,10 +237,6 @@ const Add_Div = (e) => {
         // };
       };
     };
-    // console.log($Float_Arr);
-    //setArr([...arr]);
-    // setIdx(idx + 1);
-    // console.log(arr);
     console.log($Mosaic_Arr);
   };
 
@@ -1419,7 +1415,7 @@ const onMouseDown_bar_event = (e) => {
     <!-- Dock -->
     <!-- <div id="div_mosaic_body">Mosaic Area</div> -->
     <!-- <Mosaic {...mosaic_props} /> -->
-    {#each $Mosaic_Arr as item}
+    {#each $Mosaic_Arr as item, index}
     <!-- {console.log(index)} -->
     <!-- {arr[5].arr_Data} -->
     
@@ -1467,11 +1463,10 @@ const onMouseDown_bar_event = (e) => {
             </div>
             <div class="div_Body">
               {item.left.chart_type}
-              <!-- {item.left.node_text}
-              {#if      (item.left.node_text == "Grid")}
-                <Grid data={item.left.arr_Data} />
-              {:else if (item.left.node_text == "Pie Chart")}
-                <Pie_Chart  data={item.left.arr_Data} />
+              <!-- {#if      (item.left.chart_type == 0)}
+                <Grid />
+              {:else if (item.left.chart_type == 1)}
+                <Chart />
               {/if} -->
             </div>
           </div>
@@ -1575,7 +1570,5 @@ const onMouseDown_bar_event = (e) => {
     {/each}
   </div>
 </div>
-
-
 
 <!-- export default Mosaic; -->
