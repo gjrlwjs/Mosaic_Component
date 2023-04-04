@@ -152,7 +152,7 @@
   }
 
   onMount(() => {
-    window.addEventListener('message', sub_window_message);
+    // window.addEventListener('message', sub_window_message);
   });
 
   // Grid Data Input
@@ -201,7 +201,7 @@ const Add_Div = (e) => {
       
       $Mosaic_Arr = [bst.root];
       // console.log($Mosaic_Arr);
-    } else {
+    } else { 
       // 아닌 경우는 무조건 Float
       // Float Div 추가하기
       const insert_result = bst.insert_Float($Float_Arr, select_chart, ++last_z_index);
@@ -730,21 +730,39 @@ const onMouseDown_bar_event = (e) => {
       shadow_div.style.zIndex  = "0";
     } else
     {
-      switch (drag_state) {
-        case "T":
-          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_left}%`;
-          break;
-        case "R":
-          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}%`;
-          break;
-        case "B":
-          shadow_div.style.inset = `${tmp_node.inset_top + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
-          break;
-        // default: // L
-        case "L":
-          shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
-          break;
-      }        
+      if (tmp_node.p_id == null) {
+        switch (drag_state) {
+          case "T":
+            shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% 70% ${tmp_node.inset_left}%`;
+            break;
+          case "R":
+            shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% 70%`;
+            break;
+          case "B":
+            shadow_div.style.inset = `70% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+            break;
+          // default: // L
+          case "L":
+            shadow_div.style.inset = `${tmp_node.inset_top}% 70% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+            break;
+        }
+      } else {
+        switch (drag_state) {
+          case "T":
+            shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_left}%`;
+            break;
+          case "R":
+            shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}%`;
+            break;
+          case "B":
+            shadow_div.style.inset = `${tmp_node.inset_top + ((100 - (tmp_node.inset_top + tmp_node.inset_bottom)) / 2)}% ${tmp_node.inset_right}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+            break;
+          // default: // L
+          case "L":
+            shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right + ((100 - (tmp_node.inset_left + tmp_node.inset_right)) / 2)}% ${tmp_node.inset_bottom}% ${tmp_node.inset_left}%`;
+            break;
+        }
+      }
 
       shadow_div.style.display = 'block';
       shadow_div.style.zIndex  = String(last_z_index + 100);
@@ -831,6 +849,13 @@ const onMouseDown_bar_event = (e) => {
         tmp_div_type = "R";
       } else if ((drag_state == "L") || (drag_state == "R")) {
         tmp_div_type = "C";
+      };
+
+      drag_bleft = false;
+      if ((drag_state == "T") || (drag_state == "L")) {
+        drag_bleft = true;
+      } else if ((drag_state == "B") || (drag_state == "R")) {
+        drag_bleft = false;
       };
 
       // Root 생성 시,
@@ -1175,6 +1200,13 @@ const onMouseDown_bar_event = (e) => {
             tmp_div_type = "R";
           } else if ((drag_state == "L") || (drag_state == "R")) {
             tmp_div_type = "C";
+          };
+
+          drag_bleft = false;
+          if ((drag_state == "T") || (drag_state == "L")) {
+            drag_bleft = true;
+          } else if ((drag_state == "B") || (drag_state == "R")) {
+            drag_bleft = false;
           };
 
           // Root 생성 시,
