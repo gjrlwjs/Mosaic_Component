@@ -657,6 +657,7 @@ const onMouseDown_bar_event = (e) => {
     let shadow_div = document.getElementById("shadow");
     let tmp_node   = null;
     let tmp_target = null;
+    let tmp_Root_Flag = false;
     
     if (drag_node === null) {
       return false;
@@ -675,6 +676,7 @@ const onMouseDown_bar_event = (e) => {
     } else {
       if (e.target.getAttribute("name") === "root") {
         tmp_node = $Mosaic_Arr[parseInt(e.target.id)];
+        tmp_Root_Flag = true;
       };
     };    
     // console.log(tmp_node);
@@ -730,7 +732,7 @@ const onMouseDown_bar_event = (e) => {
       shadow_div.style.zIndex  = "0";
     } else
     {
-      if (tmp_node.p_id == null) {
+      if (tmp_Root_Flag == true) {
         switch (drag_state) {
           case "T":
             shadow_div.style.inset = `${tmp_node.inset_top}% ${tmp_node.inset_right}% 70% ${tmp_node.inset_left}%`;
@@ -1098,7 +1100,7 @@ const onMouseDown_bar_event = (e) => {
       // Root가 없는데 Dock 타입으로 드레그를 했으면 Root를 만들고 자기 자신을 지운다.
       if ($Mosaic_Arr.length == 0) {
         // root 인 경우는 Dock 
-        bst.root = new Node(idx, "N", "C", "Dock", false, select_chart, 0, 0, 0, 0, 100);
+        bst.root = new Node(idx, "N", "C", "Dock", false, drag_node.chart_type, 0, 0, 0, 0, 0, 100);
         
         $Mosaic_Arr = [bst.root];
 
@@ -1552,6 +1554,7 @@ const onMouseDown_bar_event = (e) => {
           <div class="div_Title_Area">
             <!-- <input type="checkbox"  style="display:flex;" checked={item.float_type} on:change={(e) => Change_Float_Drag(checked)}/> -->
             <input type="checkbox" style="display:flex;" bind:checked={item.float_type} />
+            <!-- <button role="switch" aria-checked={checked} on:click={handleClick}></button> -->
           </div>
 
           <div class="button_Area">
